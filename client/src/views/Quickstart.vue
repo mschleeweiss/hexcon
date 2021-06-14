@@ -5,7 +5,7 @@
         <div class="hc-content">
           <h1 class="hc-title hc-nova">hex:con</h1>
           <div class="hc-init">
-            <button class="hc-btn hc-btn-outline hc-nova" :click="createGame()">create game</button>
+            <button class="hc-btn hc-btn-outline hc-nova" @click="createGame">create game</button>
           </div>
         </div>
       </div>
@@ -32,7 +32,7 @@ import { Options, Vue } from 'vue-class-component';
 export default class Quickstart extends Vue {
 
   createGame() {
-      alert(5);
+      alert(this.$store.state.name);
       this.$socket.client.emit('createGame');
     }
 
