@@ -1,9 +1,12 @@
 <template>
-  <router-view />
+  <router-view v-slot="{ Component }">
+    <transition name="fade" mode="out-in">
+      <component :is="Component" />
+    </transition>
+  </router-view>
 </template>
 
 <style lang="scss">
-
 #app {
   font-family: Lato, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -12,4 +15,6 @@
   color: $foreground;
   height: 100%;
 }
+
+
 </style>

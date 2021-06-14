@@ -1,13 +1,13 @@
 export const enum SocketEvents {
-    CLIENT_CONNECTED = 'client-connected',
-    CHANGE_NAME = 'change-name',
-    CREATE_GAME = 'create-game',
-    JOIN_GAME = 'join-game',
-    LEAVE_GAME = 'leave-game',
-    START_GAME = 'start_game',
-    PLACE_TILE = 'place-tile',
-    SWAP_TILES = 'swap-tiles',
-    REFRESH_TILES = 'refresh-tiles',
-    GAME_STATE_CHANGED = 'game-state-changed',
+    CHANGE_NAME = 'changeName',
+    CREATE_GAME = 'createGame',
+    GAME_STATE_CHANGED = 'gameStateChanged',
+    GAME_CREATED = 'gameCreated',
+    JOIN_GAME = 'joinGame',
+    LEAVE_GAME = 'leaveGame',
+    REFRESH_TILES = 'refreshTiles',
+    START_GAME = 'startGame',
+    SWAP_TILES = 'swapTiles',
+    PLACE_TILE = 'placeTile',
   }
   

@@ -1,10 +1,13 @@
-@import "_buttons", "_colors", "_other";
+@import "_buttons", "_colors", "_other", "_messagepage";
+
+* {
+    margin: 0;
+    padding: 0;
+}
 
 html,
 body {
     height: 100%;
-    padding: 0;
-    margin: 0;
     background-color: $background;
 }
 

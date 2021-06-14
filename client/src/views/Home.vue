@@ -1,34 +1,18 @@
 <template>
   <div class="hc-container">
     <header class="hc-header hc-nova">
-      <router-link
-        class="hc-routerlink"
-        to="/"
-      >
-        home
-      </router-link>
-      <router-link
-        class="hc-routerlink"
-        to="/howto"
-      >
-        how to play
-      </router-link>
-      <router-link
-        class="hc-routerlink"
-        to="/settings"
-      >
-        settings
-      </router-link>
-      <router-link
-        class="hc-routerlink"
-        to="/about"
-      >
-        about
-      </router-link>
+      <router-link class="hc-routerlink" to="/"> home </router-link>
+      <router-link class="hc-routerlink" to="/howto"> how to play </router-link>
+      <router-link class="hc-routerlink" to="/settings"> settings </router-link>
+      <router-link class="hc-routerlink" to="/about"> about </router-link>
     </header>
 
     <div class="hc-content">
-      <router-view />
+      <router-view v-slot="{ Component }">
+        <transition name="fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </div>
 
     <div class="hc-footer">
@@ -38,10 +22,9 @@
 </template>
 
 <script>
-
 export default {
-  name: 'Home'
-}
+  name: 'Home',
+};
 </script>
 
 <style lang="scss" scoped>

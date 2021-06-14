@@ -3,14 +3,9 @@
     <div class="hc-hero">
       <div class="hc-mask">
         <div class="hc-content">
-          <h1 class="hc-title hc-nova">
-            hex:con
-          </h1>
+          <h1 class="hc-title hc-nova">hex:con</h1>
           <div class="hc-init">
-            <button
-              class="hc-btn hc-btn-outline hc-nova"
-              @click="createGame"
-            >
+            <button class="hc-btn hc-btn-outline hc-nova" @click="createGame">
               create game
             </button>
           </div>
@@ -18,9 +13,7 @@
       </div>
     </div>
     <div class="hc-description">
-      <h3 class="hc-nova">
-        An online board game for 2-4 players
-      </h3>
+      <h3 class="hc-nova">An online board game for 2-4 players</h3>
       <p>
         This game is inspired by the abstract board game
         <em>Einfach Genial</em> (Ingenious/Mensa Connection). The rules are
@@ -39,12 +32,16 @@
 export default {
   name: 'Quickstart',
   methods: {
-    createGame () {
-      alert(this.$store.state.name)
-      this.$socket.client.emit('createGame')
-    }
-  }
-}
+    createGame() {
+      this.$socket.client.emit('createGame');
+    },
+  },
+  sockets: {
+    gameCreated(gameId) {
+      this.$router.push({ path: `/room/${gameId}` });
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>

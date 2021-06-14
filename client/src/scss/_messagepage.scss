@@ -1,0 +1,49 @@
+@import '_colors';
+
+$breakpoint: 600px;
+
+.hc-message-page {
+    display: flex;
+    height: 100%;
+    @media screen and (max-width: $breakpoint) {
+        flex-direction: column;
+    }
+}
+.hc-message-page-icon {
+    display: flex;
+    align-items: center;
+    padding: 3rem;
+    background-color: $current-line;
+    @media screen and (max-width: $breakpoint) {
+        font-size: 6rem;
+        justify-content: center;
+        width: 100%;
+    }
+    @media screen and (min-width: $breakpoint) {
+        font-size: 10rem;
+        justify-content: flex-end;
+        width: 40%;
+    }
+}
+
+.hc-message-page-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 3rem;
+    @media screen and (max-width: $breakpoint) {
+        width: 100%;
+    }
+    @media screen and (min-width: $breakpoint) {
+        width: 60%;
+    }
+}
+
+.hc-message-page-info h1 {
+    padding-bottom: 1rem;
+}
+
+.hc-message-page-p {
+    padding: 0.5rem 0rem;
+}
