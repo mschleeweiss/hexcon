@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import Home from '../views/Home.vue'
-import Quickstart from '../views/Quickstart.vue'
+import Home from '@/views/Home.vue'
+import Quickstart from '@/views/Quickstart.vue'
 
 const routes = [
   {

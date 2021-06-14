@@ -1,10 +1,10 @@
 import { createApp } from 'vue'
-import App from './App.vue'
+import App from '@/App.vue'
 
 import VueSocketIOExt from 'vue-socket.io-extended'
-import router from './router'
-import store from './store'
-import socket from './socket'
+import router from '@/router'
+import store from '@/store'
+import socket from '@/socket'
 
 const app = createApp(App)
 
