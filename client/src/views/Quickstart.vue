@@ -5,7 +5,7 @@
         <div class="hc-content">
           <h1 class="hc-title hc-nova">hex:con</h1>
           <div class="hc-init">
-            <button class="hc-btn hc-btn-outline hc-nova">CREATE GAME</button>
+            <button class="hc-btn hc-btn-outline hc-nova" :click="createGame()">create game</button>
           </div>
         </div>
       </div>
@@ -13,25 +13,13 @@
     <div class="hc-description">
       <h3 class="hc-nova">An online board game for 2-4 players</h3>
       <p>
-        The unusual victory condition ('highest lowest score wins') requires
-        players to develop all six colours and drives a higher degree of
-        strategic planning than would otherwise be the case. Tactical
-        considerations include not only how many points a player will earn by
-        placing a particular tile, but also which colours they will score on,
-        often resulting in a trade-off between the two. Building large blocks of
-        one colour also leads to higher scoring opportunities for one's
-        opponent, and gameplay often revolves around a player tactically
-        blocking a colour for which they have already established a scoring
-        advantage. The unusual victory condition ('highest lowest score wins') requires
-        players to develop all six colours and drives a higher degree of
-        strategic planning than would otherwise be the case. Tactical
-        considerations include not only how many points a player will earn by
-        placing a particular tile, but also which colours they will score on,
-        often resulting in a trade-off between the two. Building large blocks of
-        one colour also leads to higher scoring opportunities for one's
-        opponent, and gameplay often revolves around a player tactically
-        blocking a colour for which they have already established a scoring
-        advantage.
+        This game is inspired by the abstract board game
+        <em>Einfach Genial</em> (Ingenious/Mensa Connection). The rules are
+        simple, place a tile and collect points for the color symbols. The more
+        of the same color symbols that are next to each other on the board, the
+        more points you can score. But you have to make sure that no color is
+        too short - and always keep an eye on the score of the other players.
+        Because <strong>the player with the highest lowest color score wins</strong>.
       </p>
     </div>
   </div>
@@ -41,13 +29,20 @@
 import { Options, Vue } from 'vue-class-component';
 
 @Options({})
-export default class Quickstart extends Vue {}
+export default class Quickstart extends Vue {
+
+  createGame() {
+      alert(5);
+      this.$socket.client.emit('createGame');
+    }
+
+}
 </script>
 
 <style lang="scss" scoped>
-
 .hc-quickstart {
   height: 100%;
+  text-align: center;
 }
 .hc-hero {
   background-image: url('../assets/hero.jpeg');
@@ -57,8 +52,13 @@ export default class Quickstart extends Vue {}
 }
 
 .hc-content {
+  padding: 2rem;
   display: flex;
   flex-direction: column;
+}
+
+.hc-init {
+  padding: 1rem;
 }
 
 .hc-description {
@@ -67,20 +67,8 @@ export default class Quickstart extends Vue {}
   box-sizing: border-box;
 }
 
-.hc-btn {
-  border-radius: 2px;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-}
-
-.hc-btn-outline {
-  background-color: transparent;
-  border: 2px solid $foreground;
-  color: $foreground;
-}
-
 .hc-title {
   font-size: 4rem;
-  margin-top: 2rem;
+  margin: 1rem;
 }
 </style>

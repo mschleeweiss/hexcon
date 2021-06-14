@@ -2,10 +2,10 @@
   <div class="hc-container">
     <header class="hc-header hc-nova">
       <!-- Navbar -->
-      <router-link class="hc-routerlink" to="/">HOME</router-link>
-      <router-link class="hc-routerlink" to="/howto">HOW TO PLAY</router-link>
-      <router-link class="hc-routerlink" to="/pref">PREFERENCES</router-link>
-      <router-link class="hc-routerlink" to="/about">ABOUT</router-link>
+      <router-link class="hc-routerlink" to="/">home</router-link>
+      <router-link class="hc-routerlink" to="/howto">how to play</router-link>
+      <router-link class="hc-routerlink" to="/settings">settings</router-link>
+      <router-link class="hc-routerlink" to="/about">about</router-link>
       <!-- Navbar -->
     </header>
 
@@ -14,8 +14,7 @@
     </div>
 
     <div class="hc-footer">
-      © 2021 Copyright:
-      <a class="text-light" href="https://hexcon.io/">hexcon.io</a>
+      <span>© 2021 Copyright: <a href="https://hexcon.io/">hexcon.io</a></span>
     </div>
   </div>
 </template>
@@ -57,7 +56,9 @@ export default class Home extends Vue {}
   height: 100%;
   padding: 0rem 1rem;
   text-decoration: none;
+  text-transform: uppercase;
   color: $foreground;
+  white-space: nowrap;
   transition: all 0.3s linear;
 }
 
