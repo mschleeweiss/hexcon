@@ -1,6 +1,8 @@
 <template>
   <div class="hc-about">
-    <h1 class="hc-nova">About</h1>
+    <h1 class="hc-nova">
+      About
+    </h1>
     <ul>
       <li>
         Yes, I store information in your browser. But these are not cookies to

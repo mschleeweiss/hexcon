@@ -3,15 +3,24 @@
     <div class="hc-hero">
       <div class="hc-mask">
         <div class="hc-content">
-          <h1 class="hc-title hc-nova">hex:con</h1>
+          <h1 class="hc-title hc-nova">
+            hex:con
+          </h1>
           <div class="hc-init">
-            <button class="hc-btn hc-btn-outline hc-nova" @click="createGame">create game</button>
+            <button
+              class="hc-btn hc-btn-outline hc-nova"
+              @click="createGame"
+            >
+              create game
+            </button>
           </div>
         </div>
       </div>
     </div>
     <div class="hc-description">
-      <h3 class="hc-nova">An online board game for 2-4 players</h3>
+      <h3 class="hc-nova">
+        An online board game for 2-4 players
+      </h3>
       <p>
         This game is inspired by the abstract board game
         <em>Einfach Genial</em> (Ingenious/Mensa Connection). The rules are
@@ -19,23 +28,22 @@
         of the same color symbols that are next to each other on the board, the
         more points you can score. But you have to make sure that no color is
         too short - and always keep an eye on the score of the other players.
-        Because <strong>the player with the highest lowest color score wins</strong>.
+        Because
+        <strong>the player with the highest lowest color score wins</strong>.
       </p>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { Options, Vue } from 'vue-class-component';
-
-@Options({})
-export default class Quickstart extends Vue {
-
-  createGame() {
-      alert(this.$store.state.name);
-      this.$socket.client.emit('createGame');
+<script>
+export default {
+  name: 'Quickstart',
+  methods: {
+    createGame () {
+      alert(this.$store.state.name)
+      this.$socket.client.emit('createGame')
     }
-
+  }
 }
 </script>
 
