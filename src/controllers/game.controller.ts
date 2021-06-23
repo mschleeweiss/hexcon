@@ -1,4 +1,5 @@
-import { generate } from "rxjs";
+import { TileType } from "src/constants/tiletype";
+import { Hex } from "src/entities/hex";
 import { Player } from "src/entities/player";
 
 export class GameController {
@@ -8,9 +9,12 @@ export class GameController {
     private _id: string = this.generateId(4);
     private _admin: Player;
     private _players: Player[] = [];
+    private _board: Map<Hex, TileType> = new Map();
 
     constructor(admin: Player) {
         this._admin = admin;
+        this.generateBoard();
+        this.logBoard();
     }
 
     public get id() : string {
@@ -21,6 +25,8 @@ export class GameController {
         return {
             id: this._id,
             admin: this._admin,
+            players: this._players,
+            board: Array.from(this._board),
         };
     }
 
@@ -49,6 +55,25 @@ export class GameController {
             );
         }
         return result.join('');
+    }
+
+    private generateBoard(): void {
+        const mapRadius = this.determineMapRadius();
+        for (let q = -mapRadius; q <= mapRadius; q++) {
+            const r1 = Math.max(-mapRadius, -q - mapRadius);
+            const r2 = Math.min(mapRadius, -q + mapRadius);
+            for (let r = r1; r <= r2; r++) {
+                this._board.set(new Hex(q, r, -q-r), TileType.EMPTY);
+            }
+        }
+    }
+
+    private determineMapRadius(): number {
+        return 5;
+    }
+
+    private logBoard() {
+        console.log(this._board);
     }
 
 }
