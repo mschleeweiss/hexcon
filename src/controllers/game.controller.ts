@@ -17,10 +17,10 @@ export class GameController {
         this.logBoard();
     }
 
-    public get id() : string {
+    public get id(): string {
         return this._id;
     }
-    
+
     getGameState(): Object {
         return {
             id: this._id,
@@ -58,18 +58,29 @@ export class GameController {
     }
 
     private generateBoard(): void {
+        // todo: extract to board class
+        const cornerTiles = TileType.getAll();
+
         const mapRadius = this.determineMapRadius();
-        for (let q = -mapRadius; q <= mapRadius; q++) {
-            const r1 = Math.max(-mapRadius, -q - mapRadius);
-            const r2 = Math.min(mapRadius, -q + mapRadius);
-            for (let r = r1; r <= r2; r++) {
-                this._board.set(new Hex(q, r, -q-r), TileType.EMPTY);
+        for (let x = -mapRadius; x <= mapRadius; x++) {
+            const yLow = Math.max(-mapRadius, -x - mapRadius);
+            const yHigh = Math.min(mapRadius, -x + mapRadius);
+            for (let y = yLow; y <= yHigh; y++) {
+                const hex = new Hex(x, y, -x - y);
+                const tileType = this.isCorner(hex) ? cornerTiles.pop() : TileType.EMPTY;
+                this._board.set(hex, tileType);
             }
         }
     }
 
     private determineMapRadius(): number {
-        return 5;
+        return 3;
+    }
+
+    private isCorner(hex: Hex): boolean {
+        const radius = this.determineMapRadius();
+        const absCoords = hex.coords().map((coord: number) => Math.abs(coord));
+        return absCoords.filter((coord: number) => coord === radius).length === 2;
     }
 
     private logBoard() {
