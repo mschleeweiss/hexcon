@@ -1,32 +1,34 @@
 import { TileType } from "src/constants/tiletype";
+import { Board } from "src/entities/board";
 import { Hex } from "src/entities/hex";
 import { Player } from "src/entities/player";
+import { Pouch } from "src/entities/pouch";
+import { IEmittable } from "src/interface/emittable.interface";
 
-export class GameController {
+export class GameController implements IEmittable {
 
     private static readonly MAX_PLAYERS = 4;
 
     private _id: string = this.generateId(4);
     private _admin: Player;
     private _players: Player[] = [];
-    private _board: Map<Hex, TileType> = new Map();
+    private _board: Board = new Board(2);
+    private _pouch: Pouch = new Pouch();
 
     constructor(admin: Player) {
         this._admin = admin;
-        this.generateBoard();
-        this.logBoard();
     }
 
     public get id(): string {
         return this._id;
     }
 
-    getGameState(): Object {
+    getEmittableState(): Object {
         return {
             id: this._id,
             admin: this._admin,
             players: this._players,
-            board: Array.from(this._board),
+            board: this._board.getEmittableState(),
         };
     }
 
@@ -57,34 +59,6 @@ export class GameController {
         return result.join('');
     }
 
-    private generateBoard(): void {
-        // todo: extract to board class
-        const cornerTiles = TileType.getAll();
 
-        const mapRadius = this.determineMapRadius();
-        for (let x = -mapRadius; x <= mapRadius; x++) {
-            const yLow = Math.max(-mapRadius, -x - mapRadius);
-            const yHigh = Math.min(mapRadius, -x + mapRadius);
-            for (let y = yLow; y <= yHigh; y++) {
-                const hex = new Hex(x, y, -x - y);
-                const tileType = this.isCorner(hex) ? cornerTiles.pop() : TileType.EMPTY;
-                this._board.set(hex, tileType);
-            }
-        }
-    }
-
-    private determineMapRadius(): number {
-        return 3;
-    }
-
-    private isCorner(hex: Hex): boolean {
-        const radius = this.determineMapRadius();
-        const absCoords = hex.coords().map((coord: number) => Math.abs(coord));
-        return absCoords.filter((coord: number) => coord === radius).length === 2;
-    }
-
-    private logBoard() {
-        console.log(this._board);
-    }
 
 }

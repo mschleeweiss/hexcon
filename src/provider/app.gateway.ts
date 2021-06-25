@@ -91,6 +91,6 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     socket.join(payload.gameId);
 
     const event = 'gameStateChanged';
-    return { event, data: game.getGameState() };
+    return { event, data: game.getEmittableState() };
   }
 }
