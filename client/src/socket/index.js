@@ -5,7 +5,7 @@ const initParams = {
   name: store.state.name,
   id: store.state.socketId
 }
-
+console.log(initParams);
 const options = {
   query: initParams
 }

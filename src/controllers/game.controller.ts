@@ -1,7 +1,7 @@
 import { TileType } from "src/constants/tiletype";
 import { Board } from "src/entities/board";
 import { Hex } from "src/entities/hex";
-import { Player } from "src/entities/player";
+import { User } from "src/entities/user";
 import { Pouch } from "src/entities/pouch";
 import { IEmittable } from "src/interface/emittable.interface";
 
@@ -10,12 +10,12 @@ export class GameController implements IEmittable {
     private static readonly MAX_PLAYERS = 4;
 
     private _id: string = this.generateId(4);
-    private _admin: Player;
-    private _players: Player[] = [];
+    private _admin: User;
+    private _players: User[] = [];
     private _board: Board = new Board(2);
     private _pouch: Pouch = new Pouch();
 
-    constructor(admin: Player) {
+    constructor(admin: User) {
         this._admin = admin;
     }
 
@@ -32,13 +32,14 @@ export class GameController implements IEmittable {
         };
     }
 
-    addPlayer(player: Player): void {
-        if (!this._players.includes(player)) {
+    addPlayer(user: User): void {
+        if (!this._players.includes(user)) {
+            console.log("PLAYER ADDED");
 
             if (this._players.length === GameController.MAX_PLAYERS) {
                 throw new Error('room_full');
             }
-            this._players.push(player);
+            this._players.push(user);
             this.updateGameStartable();
         }
     }

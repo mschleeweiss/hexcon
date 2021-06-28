@@ -9,19 +9,19 @@ import {
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
-import { Player } from '../entities/player';
+import { User } from '../entities/user';
 import { SocketEvents } from 'src/constants/socketevents';
 import { GameController } from 'src/controllers/game.controller';
 
 @WebSocketGateway()
 export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
-  private players: Map<string, Player>;
+  private users: Map<string, User>;
   private games: Map<string, GameController>;
   private logger: Logger;
 
   constructor() {
-    this.players = new Map();
+    this.users = new Map();
     this.games = new Map();
     this.logger = new Logger('AppGateway');
   }
@@ -29,15 +29,16 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleConnection(client: Socket, ...args: any[]) {
     const oldId = client.handshake.query.id as string;
     const name = client.handshake.query.name as string;
+    console.log("lol + " + oldId)
     
-    let player = this.players.get(oldId);
+    let player = this.users.get(oldId);
     if (player) {
       player.id = client.id;
-      this.players.delete(oldId);
+      this.users.delete(oldId);
     } else {
-      player = new Player(client.id, name);
+      player = new User(client.id, name);
     }
-    this.players.set(client.id, player);
+    this.users.set(client.id, player);
     
     client.emit('clientConnected', client.id);
     this.logger.log(`Client connected: ${client.id}`);
@@ -49,7 +50,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage(SocketEvents.CHANGE_NAME)
   handleChangeName(socket: Socket, payload: any): void {
-    const player = this.players.get(socket.id);
+    const player = this.users.get(socket.id);
     if (!player) {
       throw new WsException('player_not_found');
     }
@@ -58,8 +59,8 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage(SocketEvents.CREATE_GAME)
-  handleCreateGame(socket: Socket, payload: any): WsResponse<unknown> {
-    const player = this.players.get(socket.id);
+  handleCreateGame(client: Socket, payload: any): WsResponse<unknown> {
+    const player = this.users.get(client.id);
 
     if (!player) {
       throw new WsException('player_not_found');
@@ -72,8 +73,8 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage(SocketEvents.JOIN_GAME)
-  handleJoinGame(socket: Socket, payload: any): WsResponse<unknown> {
-    const player = this.players.get(socket.id);
+  handleJoinGame(client: Socket, payload: any): WsResponse<unknown> {
+    const player = this.users.get(client.id);
     if (!player) {
       throw new WsException('player_not_found');
     }
@@ -88,7 +89,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } catch (e) {
       throw new WsException(e.message);
     }
-    socket.join(payload.gameId);
+    client.join(payload.gameId);
 
     const event = 'gameStateChanged';
     return { event, data: game.getEmittableState() };

@@ -6,6 +6,16 @@
   </router-view>
 </template>
 
+<script>
+export default {
+  sockets: {
+    clientConnected(socketId) {
+      this.$store.commit('updateSocketId', socketId);
+    }
+  }
+}
+</script>
+
 <style lang="scss">
 #app {
   font-family: Lato, Helvetica, Arial, sans-serif;

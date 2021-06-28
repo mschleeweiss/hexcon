@@ -1,4 +1,4 @@
-export class Player {
+export class User {
     id: string;
     name: string;
     connected: boolean;
@@ -9,8 +9,8 @@ export class Player {
       this.connected = true;
     }
   
-    equals(player: Player): boolean {
-      return player.id === this.id;
+    equals(user: User): boolean {
+      return user.id === this.id;
     }
   }
   
