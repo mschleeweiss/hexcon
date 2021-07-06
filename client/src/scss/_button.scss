@@ -1,0 +1,43 @@
+.hc-btn {
+    border-radius: 2px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.hc-btn-outline {
+    background-color: transparent;
+    border: 2px solid $foreground;
+    color: $foreground;
+    transition: all 0.3s ease;
+}
+
+.hc-btn-outline:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.hc-btn-outline:hover:enabled {
+    background-color: $foreground;
+    color: $background;
+}
+
+.hc-btn-outline.hc-emphasized {
+    border: 2px solid $cyan;
+    color: $cyan;
+}
+
+.hc-btn-outline.hc-emphasized:hover:enabled {
+    background-color: $cyan;
+    color: $background;
+}
+
+.hc-btn-outline.hc-success {
+    border: 2px solid $green;
+    color: $green;
+}
+
+.hc-btn-outline.hc-success:hover:enabled {
+    background-color: $green;
+    color: $background;
+}

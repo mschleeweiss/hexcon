@@ -1,5 +1,5 @@
 <template>
-  <div class="hc-howto">
-    <h1>How to play this game</h1>
+  <div>
+    <h1 class="hc-nova">How to play this game</h1>
   </div>
 </template>

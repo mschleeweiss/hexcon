@@ -2,8 +2,8 @@
   <div class="hc-room">
     <NotFound v-if="notFound" />
     <RoomFull v-if="roomFull" />
-    <Lobby v-if="!notFound && !roomFull" :game="game" />
-    <Board v-if="false" :map="map" />
+    <Lobby v-if="showLobby" :game="game" />
+    <Board v-if="showBoard" :map="map" :players="players" />
   </div>
 </template>
 
@@ -23,7 +23,7 @@ export default {
   },
   data() {
     return {
-      game: null,
+      game: {},
       notFound: false,
       roomFull: false,
     };
@@ -35,6 +35,24 @@ export default {
     players() {
       return this.game?.players ?? [];
     },
+    map() {
+      return this.game?.board?.map ?? [];
+    },
+    showLobby() {
+      return (
+        !this.notFound &&
+        !this.roomFull &&
+        !this.game?.active &&
+        !this.game?.over
+      );
+    },
+    showBoard() {
+      return (
+        !this.notFound &&
+        !this.roomFull &&
+        (this.game?.active || this.game?.over)
+      );
+    },
     socketId() {
       return this.$store.state.socketId;
     },
@@ -44,8 +62,7 @@ export default {
       gameId: this.gameId,
     });
   },
-  methods: {
-  },
+  methods: {},
   sockets: {
     gameStateChanged(game) {
       this.game = game;

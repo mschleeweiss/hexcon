@@ -1,5 +1,6 @@
 import { TileType } from "src/constants/tiletype";
 import { IEmittable } from "src/interface/emittable.interface";
+import { Score } from "./score";
 import { Tile } from "./tile";
 import { User } from "./user";
 
@@ -7,11 +8,11 @@ import { User } from "./user";
 export class Player implements IEmittable{
     private static readonly MAX_TILES = 6;
 
-    _user: User;
-    _tiles: Tile[] = [];
-    _ready: boolean = false;
+    private _user: User;
+    private _tiles: Tile[] = [];
+    private _ready: boolean = false;
+    private _score: Score = new Score();
 
-  
     constructor(user: User) {
         this._user = user;
     }
@@ -32,9 +33,15 @@ export class Player implements IEmittable{
         this._ready = value;
     }
 
+    get score(): Score {
+        return this._score;
+    }
+
     getEmittableState(): Object {
         return {
-            user: this.user
+            user: this.user,
+            ready: this.ready,
+            score: this.score.getEmittableState(),
         };
     }
     

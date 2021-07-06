@@ -72,7 +72,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage(SocketEvents.JOIN_GAME)
-  handleJoinGame(client: Socket, payload: any): WsResponse<unknown> {
+  handleJoinGame(client: Socket, payload: any): void{
     const user = this.users.get(client.id);
     if (!user) {
       throw new WsException('player_not_found');
@@ -91,11 +91,11 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.join(payload.gameId);
 
     const event = 'gameStateChanged';
-    return { event, data: game.getEmittableState() };
+    this.server.to(payload.gameId).emit('gameStateChanged', game.getEmittableState());
   }
 
-  @SubscribeMessage(SocketEvents.JOIN_GAME)
-  handleChangeReadiness(client: Socket, payload: any): WsResponse<unknown> {
+  @SubscribeMessage(SocketEvents.TOGGLE_READINESS)
+  handleChangeReadiness(client: Socket, payload: any): void {
     const user = this.users.get(client.id);
     if (!user) {
       throw new WsException('player_not_found');
@@ -113,6 +113,28 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     const event = 'gameStateChanged';
-    return { event, data: game.getEmittableState() };
+    this.server.to(payload.gameId).emit(event, game.getEmittableState());
+  }
+
+  @SubscribeMessage(SocketEvents.START_GAME)
+  handleStartGame(client: Socket, payload: any): void {
+    const user = this.users.get(client.id);
+    if (!user) {
+      throw new WsException('player_not_found');
+    }
+
+    const game = this.games.get(payload.gameId);
+    if (!game) {
+      throw new WsException('game_not_found');
+    }
+
+    try {
+      game.startGame(user);
+    } catch (e) {
+      throw new WsException(e.message);
+    }
+
+    const event = 'gameStateChanged';
+    this.server.to(payload.gameId).emit(event, game.getEmittableState());
   }
 }

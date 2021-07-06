@@ -1,0 +1,39 @@
+.hc-snackbar {
+    visibility: hidden;
+    min-width: 250px;
+    text-align: left;
+    border-radius: 2px;
+    padding: 1rem;
+    position: fixed;
+    z-index: 2;
+    left: 0;
+    top: calc(50% - 1.5rem);
+    font-size: 1rem;
+    box-shadow: 0 5px 10px 0 rgb(0 0 0 / 15%);
+    opacity: 0.9;
+}
+.hc-snackbar.show {
+    visibility: visible;
+    animation: fadein 0.5s, fadeout 0.5s 3.5s;
+}
+@keyframes fadein {
+    from {
+        left: -250px;
+        opacity: 0;
+    }
+    to {
+        top: calc(50% - 1.5rem);
+        opacity: 0.9;
+    }
+}
+
+@keyframes fadeout {
+    from {
+        top: calc(50% - 1.5rem);
+        opacity: 1;
+    }
+    to {
+        left: -250px;
+        opacity: 0;
+    }
+}

@@ -9,7 +9,7 @@
         This game is already at full capacity. We support up to 4 players. With
         more players it would become unbalanced.
       </p>
-      <p class="hc-message-page-p">However you can create your won game room ;)</p>
+      <p class="hc-message-page-p">However you can create your own game room ;)</p>
     </div>
   </div>
 </template>

@@ -5,7 +5,7 @@ export const enum SocketEvents {
     GAME_CREATED = 'gameCreated',
     JOIN_GAME = 'joinGame',
     LEAVE_GAME = 'leaveGame',
-    CHANGE_READINESS = 'changeReadiness',
+    TOGGLE_READINESS = 'toggleReadiness',
     REFRESH_TILES = 'refreshTiles',
     START_GAME = 'startGame',
     SWAP_TILES = 'swapTiles',

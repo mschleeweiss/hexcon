@@ -14,9 +14,12 @@ export class GameController implements IEmittable {
     private _id: string = this.generateId(4);
     private _admin: User;
     private _players: Player[] = [];
-    private _board: Board = new Board(2);
+    private _board: Board;
     private _pouch: Pouch = new Pouch();
     private _startable: boolean = false;
+    private _active: boolean = false;
+    private _over: boolean = false;
+    private _currentPlayer: Player;
 
     constructor(admin: User) {
         this._admin = admin;
@@ -31,15 +34,16 @@ export class GameController implements IEmittable {
             id: this._id,
             admin: this._admin,
             players: this._players.map((player: Player) => player.getEmittableState()),
-            board: this._board.getEmittableState(),
+            currentPlayer: this._currentPlayer?.getEmittableState(),
+            board: this._board?.getEmittableState(),
             startable: this._startable,
+            active: this._active,
+            over: this._over,
         };
     }
 
     addPlayer(user: User): void {
         const playerAlreadyExists = this._players.some((player: Player) => player.user.equals(user))
-        console.log(user);
-        console.log(this._players);
         if (!playerAlreadyExists) {
 
             if (this._players.length === GameController.MAX_PLAYERS) {
@@ -61,10 +65,34 @@ export class GameController implements IEmittable {
         this.updateGameStartable();
     }
 
+    startGame(user: User) {
+        if (this._admin !== user) {
+            throw new Error('unauthorized');
+        }
+
+        if (!this._startable) {
+            throw new Error('unauthorized');
+        }
+
+        this._active = true;
+        this._board = new Board(this._players.length);
+        this.determineCurrentPlayer();
+    }
+
     private updateGameStartable(): void {
         this._startable = GameController.MIN_PLAYERS <= this._players.length
             && this._players.length <= GameController.MAX_PLAYERS
             && this._players.every((player: Player) => player.ready);
+    }
+
+    private determineCurrentPlayer(): void {
+        if (!this._currentPlayer) {
+            this._currentPlayer = this._players[0];
+        } else {
+            const idx = this._players.indexOf(this._currentPlayer);
+            const newIdx = idx + 1 % this._players.length;
+            this._currentPlayer = this._players[newIdx];
+        }
     }
 
     private generateId(length: number): string {

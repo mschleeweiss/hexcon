@@ -12,9 +12,11 @@ export class Board implements IEmittable {
     }
 
     getEmittableState(): Object {
-        return {
-            map: Array.from(this._map)
-        };
+        const map = Array
+            .from(this._map)
+            .map((val: [Hex, number]) => ({ coords: val[0], type: val[1] }));
+
+        return { map };
     }
 
     private generateBoard(): void {
