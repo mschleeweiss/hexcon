@@ -25,7 +25,7 @@ export class GameController implements IEmittable {
         this._admin = admin;
     }
 
-    public get id(): string {
+    get id(): string {
         return this._id;
     }
 
@@ -77,6 +77,7 @@ export class GameController implements IEmittable {
         this._active = true;
         this._board = new Board(this._players.length);
         this.determineCurrentPlayer();
+        this.initPlayerTiles();
     }
 
     private updateGameStartable(): void {
@@ -93,6 +94,15 @@ export class GameController implements IEmittable {
             const newIdx = idx + 1 % this._players.length;
             this._currentPlayer = this._players[newIdx];
         }
+    }
+
+    private initPlayerTiles() {
+        this._players.forEach((player: Player) => {
+            while (player.canDrawTile()) {
+                const tile = this._pouch.drawTile();
+                player.addTile(tile);
+            }
+        })
     }
 
     private generateId(length: number): string {

@@ -3,10 +3,11 @@ import { IEmittable } from "src/interface/emittable.interface";
 import { Hex } from "./hex";
 
 export class Board implements IEmittable {
+
     _playerCount: number;
     _map: Map<Hex, TileType> = new Map();
 
-    constructor(public playerCount: number) {
+    constructor(playerCount: number) {
         this._playerCount = playerCount;
         this.generateBoard();
     }
@@ -20,7 +21,6 @@ export class Board implements IEmittable {
     }
 
     private generateBoard(): void {
-        // todo: extract to board class
         const cornerTiles = TileType.getAll();
 
         const mapRadius = this.determineMapRadius();

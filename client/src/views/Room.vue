@@ -3,7 +3,7 @@
     <NotFound v-if="notFound" />
     <RoomFull v-if="roomFull" />
     <Lobby v-if="showLobby" :game="game" />
-    <Board v-if="showBoard" :map="map" :players="players" />
+    <Board v-if="showBoard" :map="map" :players="players" :currentPlayer="game?.currentPlayer" />
   </div>
 </template>
 
