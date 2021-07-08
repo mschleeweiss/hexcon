@@ -7,7 +7,6 @@ export class Pouch {
 
     constructor() {
         this.generatePouch();
-        console.log(this._tiles);
     }
 
     drawTile() {

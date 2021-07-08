@@ -3,7 +3,14 @@
     <NotFound v-if="notFound" />
     <RoomFull v-if="roomFull" />
     <Lobby v-if="showLobby" :game="game" />
-    <Board v-if="showBoard" :map="map" :players="players" :currentPlayer="game?.currentPlayer" />
+    <Board
+      v-if="showBoard"
+      :map="map"
+      :players="players"
+      :currentPlayer="game?.currentPlayer"
+      :playerTiles="playerTiles"
+      @mounted="refreshTiles"
+    />
   </div>
 </template>
 
@@ -24,6 +31,7 @@ export default {
   data() {
     return {
       game: {},
+      playerTiles: [],
       notFound: false,
       roomFull: false,
     };
@@ -62,7 +70,15 @@ export default {
       gameId: this.gameId,
     });
   },
-  methods: {},
+  methods: {
+    refreshTiles() {
+      const data = { gameId: this.gameId };
+      const ack = (tiles) => {
+        this.playerTiles = tiles;
+      };
+      this.$socket.client.emit('refreshTiles', data, ack);
+    },
+  },
   sockets: {
     gameStateChanged(game) {
       this.game = game;

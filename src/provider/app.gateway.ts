@@ -12,6 +12,8 @@ import { Socket, Server } from 'socket.io';
 import { User } from '../entities/user';
 import { SocketEvents } from 'src/constants/socketevents';
 import { GameController } from 'src/controllers/game.controller';
+import { Player } from 'src/entities/player';
+import { Tile } from 'src/entities/tile';
 
 @WebSocketGateway()
 export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -91,7 +93,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.join(payload.gameId);
 
     const event = 'gameStateChanged';
-    this.server.to(payload.gameId).emit('gameStateChanged', game.getEmittableState());
+    this.server.to(payload.gameId).emit(event, game.getEmittableState());
   }
 
   @SubscribeMessage(SocketEvents.TOGGLE_READINESS)
@@ -136,5 +138,20 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const event = 'gameStateChanged';
     this.server.to(payload.gameId).emit(event, game.getEmittableState());
+  }
+
+  @SubscribeMessage(SocketEvents.REFRESH_TILES)
+  handleRefreshTiles(client: Socket, payload: any): Array<unknown> {    
+    const game = this.games.get(payload.gameId);
+    if (!game) {
+      throw new WsException('game_not_found');
+    }
+
+    const player = game.players.find((player: Player) => player.user.id === client.id);
+    if (!player) {
+      throw new WsException('player_not_found');
+    }
+
+    return player.tiles;
   }
 }

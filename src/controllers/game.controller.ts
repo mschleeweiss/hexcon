@@ -29,6 +29,11 @@ export class GameController implements IEmittable {
         return this._id;
     }
 
+    get players(): Player[] {
+        // shallow copy so array can't be modified
+        return [...this._players];
+    }
+
     getEmittableState(): Object {
         return {
             id: this._id,
@@ -50,17 +55,21 @@ export class GameController implements IEmittable {
                 throw new Error('room_full');
             }
 
-            // todo: don't add player if game is already running/over
+            if (this._active || this._over) {
+                throw new Error('game_already_in_progress');
+            }
+
             this._players.push(new Player(user));
             this.updateGameStartable();
         }
     }
 
     changeReadiness(user: User) {
-        const player = this._players.find((player: Player) => player.user.equals(user));
-        if (!player) {
-            // error
+        if (this._active || this._over) {
+            return;
         }
+        
+        const player = this._players.find((player: Player) => player.user.equals(user));
         player.ready = !player.ready;
         this.updateGameStartable();
     }

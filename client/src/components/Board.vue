@@ -1,5 +1,6 @@
 <template>
   <div class="hc-board">
+    <!-- left div -->
     <div class="hc-playerstats">
       <div
         class="hc-scorepanel hc-border"
@@ -34,8 +35,9 @@
         </div>
       </div>
     </div>
+    <!-- center div -->
     <div class="hc-svg-container">
-      <svg class="hc-map" :viewBox="viewBox">
+      <svg class="hc-map" :viewBox="mapViewBox">
         <defs>
           <g id="pod">
             <polygon :points="hexPoints" />
@@ -56,6 +58,30 @@
           />
         </g>
       </svg>
+    </div>
+    <!-- right div -->
+    <div class="hc-playertiles">
+      <div v-for="tile in playerTiles" :key="tile">
+        <svg viewBox="-100 -100 400 200">
+          <defs>
+            <g id="pod">
+              <polygon :points="hexPoints" />
+            </g>
+          </defs>
+          <g class="hc-cell">
+            <use
+              :class="calcColor(tile.first)"
+              xlink:href="#pod"
+              :transform="calcTransformation({q:0,r:0,s:0})"
+            />
+            <use
+              :class="calcColor(tile.second)"
+              xlink:href="#pod"
+              :transform="calcTransformation({q:1,r:0,s:-1})"
+            />
+          </g>
+        </svg>
+      </div>
     </div>
   </div>
 </template>
@@ -81,6 +107,11 @@ export default {
       required: true,
       default: () => {},
     },
+    playerTiles: {
+      type: Array,
+      required: true,
+      default: () => [],
+    },
   },
   data() {
     return {
@@ -101,9 +132,18 @@ export default {
         .map((o) => `${Math.round(o.x)},${Math.round(o.y)}`)
         .join(' ');
     },
-    viewBox() {
+    mapViewBox() {
       const rightHex = this.cellToHex(this.map[this.map.length - 1]);
-      const point = this.layout.polygonCorners(rightHex)[0]
+      const point = this.layout.polygonCorners(rightHex)[0];
+
+      const offset = Math.ceil(point.x);
+      const size = offset * 2;
+
+      return `-${offset} -${offset} ${size} ${size}`;
+    },
+    tileViewBox() {
+const rightHex = new Hex(1,0,-1);
+      const point = this.layout.polygonCorners(rightHex)[0];
 
       const offset = Math.ceil(point.x);
       const size = offset * 2;
@@ -135,6 +175,9 @@ export default {
       return new Hex(cell.coords.q, cell.coords.r, cell.coords.s);
     },
   },
+  mounted() {
+    this.$emit('mounted');
+  },
 };
 </script>
 
@@ -160,6 +203,11 @@ export default {
   justify-content: center;
   align-items: center;
   width: 70%;
+}
+
+.hc-playertiles {
+  width: 20%;
+  min-width: 15rem;
 }
 
 .hc-map {
