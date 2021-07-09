@@ -1,7 +1,7 @@
 <template>
   <div class="hc-board">
     <!-- left div -->
-    <div class="hc-playerstats">
+    <div class="hc-stats-container">
       <div
         class="hc-scorepanel hc-border"
         :class="{ active: currentPlayer.user?.id === player.user.id }"
@@ -36,8 +36,8 @@
       </div>
     </div>
     <!-- center div -->
-    <div class="hc-svg-container">
-      <svg class="hc-map" :viewBox="mapViewBox">
+    <div class="hc-map-container">
+      <svg :viewBox="mapViewBox" @contextmenu="rotateSelectedTile">
         <defs>
           <g id="pod">
             <polygon :points="hexPoints" />
@@ -48,21 +48,31 @@
             :class="[
               calcColor(cell.type),
               {
-                active: cell.type === 0 && currentPlayer.user?.id === socketId,
+                active:
+                  (cell.type === 0 || cell.temp) &&
+                  currentPlayer.user?.id === socketId,
               },
             ]"
             v-for="cell in map"
             :key="cell"
             xlink:href="#pod"
             :transform="calcTransformation(cell.coords)"
+            @mouseover="mouseover(cell)"
           />
         </g>
       </svg>
     </div>
     <!-- right div -->
-    <div class="hc-playertiles">
+    <div
+      class="hc-tile-container"
+      :class="{ active: currentPlayer.user?.id === socketId }"
+    >
       <div v-for="tile in playerTiles" :key="tile">
-        <svg viewBox="-100 -100 400 200">
+        <svg
+          class="hc-tile"
+          :viewBox="tileViewBox"
+          @click="selectedTile = tile"
+        >
           <defs>
             <g id="pod">
               <polygon :points="hexPoints" />
@@ -72,15 +82,52 @@
             <use
               :class="calcColor(tile.first)"
               xlink:href="#pod"
-              :transform="calcTransformation({q:0,r:0,s:0})"
+              :transform="calcTransformation({ q: 0, r: 0, s: 0 })"
             />
             <use
               :class="calcColor(tile.second)"
               xlink:href="#pod"
-              :transform="calcTransformation({q:1,r:0,s:-1})"
+              :transform="calcTransformation({ q: 1, r: 0, s: -1 })"
             />
           </g>
         </svg>
+      </div>
+      <div
+        class="hc-selected-tile-container"
+        v-if="currentPlayer.user?.id === socketId"
+      >
+        <button
+          class="hc-btn hc-btn-outline hc-nova"
+          @click="rotateSelectedTile"
+        >
+          <i class="fas fa-redo"></i>
+        </button>
+        <div>
+          <svg
+            v-if="!!selectedTile"
+            class="selected"
+            :viewBox="tileViewBox"
+            :transform="selectedTileRotation"
+          >
+            <defs>
+              <g id="pod">
+                <polygon :points="hexPoints" />
+              </g>
+            </defs>
+            <g class="hc-cell">
+              <use
+                :class="calcColor(selectedTile?.first)"
+                xlink:href="#pod"
+                :transform="calcTransformation({ q: 0, r: 0, s: 0 })"
+              />
+              <use
+                :class="calcColor(selectedTile?.second)"
+                xlink:href="#pod"
+                :transform="calcTransformation({ q: 1, r: 0, s: -1 })"
+              />
+            </g>
+          </svg>
+        </div>
       </div>
     </div>
   </div>
@@ -123,6 +170,8 @@ export default {
         5: 'orange',
         6: 'blue',
       },
+      selectedTile: undefined,
+      selectedTileDirection: 0,
     };
   },
   computed: {
@@ -142,13 +191,16 @@ export default {
       return `-${offset} -${offset} ${size} ${size}`;
     },
     tileViewBox() {
-const rightHex = new Hex(1,0,-1);
-      const point = this.layout.polygonCorners(rightHex)[0];
+      const leftPoints = this.layout.polygonCorners(new Hex(0, 0, 0));
+      const rightPoints = this.layout.polygonCorners(new Hex(1, 0, -1));
 
-      const offset = Math.ceil(point.x);
-      const size = offset * 2;
+      const offsetX = Math.min(...leftPoints.map((p) => p.x));
+      const offsetY = Math.min(...leftPoints.map((p) => p.y));
 
-      return `-${offset} -${offset} ${size} ${size}`;
+      const sizeX = Math.max(...rightPoints.map((p) => p.x)) - offsetX;
+      const sizeY = Math.max(...rightPoints.map((p) => p.y)) - offsetY;
+
+      return `${offsetX} ${offsetY} ${sizeX} ${sizeY}`;
     },
     layout() {
       return new Layout(Layout.pointy, new Point(100, 100), new Point(0, 0));
@@ -160,6 +212,9 @@ const rightHex = new Hex(1,0,-1);
       return Array(18)
         .fill()
         .map((_, i) => i + 1);
+    },
+    selectedTileRotation() {
+      return `rotate(-${60 * this.selectedTileDirection})`;
     },
   },
   methods: {
@@ -173,6 +228,43 @@ const rightHex = new Hex(1,0,-1);
     },
     cellToHex(cell) {
       return new Hex(cell.coords.q, cell.coords.r, cell.coords.s);
+    },
+    hexToCell(hex) {
+      return this.map.find(
+        (o) =>
+          o.coords.q === hex.q && o.coords.r === hex.r && o.coords.s === hex.s,
+      );
+    },
+    rotateSelectedTile(event) {
+      this.selectedTileDirection = (this.selectedTileDirection + 1) % 6;
+      if (event.type === 'contextmenu') {
+        const cell = document.elementFromPoint(event.clientX, event.clientY);
+        cell.dispatchEvent(new Event('mouseover'));
+        event.preventDefault();
+      }
+    },
+    mouseover(firstCell) {
+      if (!this.selectedTile) {
+        return;
+      }
+
+      this.map
+        .filter((cell) => cell.temp)
+        .forEach((cell) => {
+          cell.type = 0;
+          delete cell.temp;
+        });
+
+      const firstHex = this.cellToHex(firstCell);
+      const secondHex = firstHex.neighbor(this.selectedTileDirection);
+      const secondCell = this.hexToCell(secondHex);
+
+      if (firstCell.type === 0 && secondCell?.type === 0) {
+        firstCell.temp = true;
+        firstCell.type = this.selectedTile.first;
+        secondCell.temp = true;
+        secondCell.type = this.selectedTile.second;
+      }
     },
   },
   mounted() {
@@ -191,26 +283,52 @@ const rightHex = new Hex(1,0,-1);
   display: flex;
 }
 
-.hc-playerstats {
+.hc-stats-container {
   min-width: 21rem;
   width: 20%;
   padding: 1rem;
   overflow: scroll;
 }
 
-.hc-svg-container {
+.hc-map-container {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 70%;
 }
 
-.hc-playertiles {
+.hc-tile-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 20%;
   min-width: 15rem;
+  opacity: 0.5;
+  transition: all 0.5s ease;
 }
 
-.hc-map {
+.hc-tile-container.active {
+  opacity: 1;
+}
+
+.hc-tile-container svg {
+  height: 3rem;
+}
+
+.hc-selected-tile-container {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.hc-selected-tile-container > div {
+  height: 6rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hc-map-container svg {
   height: 100%;
 }
 
@@ -223,7 +341,6 @@ const rightHex = new Hex(1,0,-1);
 
 .hc-cell use.active:hover {
   cursor: pointer;
-  fill: $comment;
 }
 
 .hc-cell use.red {
