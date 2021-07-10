@@ -106,8 +106,13 @@ export class GameController implements IEmittable {
         const scoreMap = this._board.calculateScorepoints(move.cells, move.tile);
         const originalTile = this._currentPlayer.takeTile(move.tile.first, move.tile.second);
 
-        this._board.updateCell(move.cells[0], move.tile.first);
-        this._board.updateCell(move.cells[1], move.tile.second);
+        this._board.updateCell(move.cells[0], originalTile.first);
+        this._board.updateCell(move.cells[1], originalTile.second);
+
+        scoreMap.forEach((value: number, color: TileType) => {
+            this._currentPlayer.score.incrementScore(color, value);
+        })
+
         // determine current player (may be the same if has extra move)
         // return error/success for callback
     }

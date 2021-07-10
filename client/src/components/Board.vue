@@ -28,7 +28,7 @@
             class="hc-scorepoint"
             :class="[
               calcColor(score.type),
-              { active: point <= score.value + 5 },
+              { active: point <= score.value },
             ]"
             :style="`--point:${point}`"
           />
@@ -405,7 +405,7 @@ export default {
   height: 0.75rem;
   width: 0.75rem;
   margin-right: 0.125rem;
-  opacity: calc((1 / 18) * var(--point));
+  opacity: calc(0.4 + (0.6 / 18) * var(--point));
 }
 
 .hc-score-id {
