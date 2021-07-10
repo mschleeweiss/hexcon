@@ -7,6 +7,10 @@ export class Hex {
         if (Math.round(q + r + s) !== 0) throw "q + r + s must be 0";
     }
 
+    equals(hex: Hex): boolean {
+        return hex && this.q === hex.q && this.r === hex.r && this.s === hex.s;
+    }
+
     add(b: Hex): Hex {
         return new Hex(this.q + b.q, this.r + b.r, this.s + b.s);
     }
@@ -21,11 +25,9 @@ export class Hex {
         return new Hex(this.q * k, this.r * k, this.s * k);
     }
 
-
     rotateLeft(): Hex {
         return new Hex(-this.s, -this.q, -this.r);
     }
-
 
     rotateRight(): Hex {
         return new Hex(-this.r, -this.s, -this.q);
@@ -37,17 +39,9 @@ export class Hex {
         return Hex.directions[direction];
     }
 
-
     neighbor(direction: number): Hex {
         return this.add(Hex.direction(direction));
     }
-
-    static diagonals: Hex[] = [new Hex(2, -1, -1), new Hex(1, -2, 1), new Hex(-1, -1, 2), new Hex(-2, 1, 1), new Hex(-1, 2, -1), new Hex(1, 1, -2)];
-
-    diagonalNeighbor(direction: number): Hex {
-        return this.add(Hex.diagonals[direction]);
-    }
-
 
     len(): number {
         return (Math.abs(this.q) + Math.abs(this.r) + Math.abs(this.s)) / 2;

@@ -5,6 +5,7 @@ import { User } from "src/entities/user";
 import { Pouch } from "src/entities/pouch";
 import { IEmittable } from "src/interface/emittable.interface";
 import { Player } from "src/entities/player";
+import { Move } from "src/entities/move";
 
 export class GameController implements IEmittable {
 
@@ -87,6 +88,28 @@ export class GameController implements IEmittable {
         this._board = new Board(this._players.length);
         this.determineCurrentPlayer();
         this.initPlayerTiles();
+    }
+
+    makeMove(move: Move) {
+        if (this._currentPlayer.user !== move.user) {
+            throw new Error('unauthorized');
+        }
+
+        if (!this._currentPlayer.hasTile(move.tile)) {
+            throw new Error('invalid_move');
+        }
+
+        if (!this._board.areCellsFree(move.cells) || !this._board.areCellsNeighbors(move.cells)) {
+            throw new Error ('invalid_move')
+        }
+        
+        const scoreMap = this._board.calculateScorepoints(move.cells, move.tile);
+        const originalTile = this._currentPlayer.takeTile(move.tile.first, move.tile.second);
+
+        this._board.updateCell(move.cells[0], move.tile.first);
+        this._board.updateCell(move.cells[1], move.tile.second);
+        // determine current player (may be the same if has extra move)
+        // return error/success for callback
     }
 
     private updateGameStartable(): void {

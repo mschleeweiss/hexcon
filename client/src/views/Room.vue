@@ -10,6 +10,7 @@
       :currentPlayer="game?.currentPlayer"
       :playerTiles="playerTiles"
       @mounted="refreshTiles"
+      @make-move="syncMove"
     />
   </div>
 </template>
@@ -77,6 +78,15 @@ export default {
         this.playerTiles = tiles;
       };
       this.$socket.client.emit('refreshTiles', data, ack);
+    },
+    syncMove(tile) {
+      const data = { gameId: this.gameId, tile };
+      this.$socket.client.emit('placeTile', data, (resp) => {
+        console.log(resp);
+        if (resp.success) {
+          this.refreshTiles();
+        }
+      });
     },
   },
   sockets: {

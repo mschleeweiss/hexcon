@@ -13,7 +13,7 @@ import { User } from '../entities/user';
 import { SocketEvents } from 'src/constants/socketevents';
 import { GameController } from 'src/controllers/game.controller';
 import { Player } from 'src/entities/player';
-import { Tile } from 'src/entities/tile';
+import { Move } from 'src/entities/move';
 
 @WebSocketGateway()
 export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -31,7 +31,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleConnection(client: Socket, ...args: any[]) {
     const oldId = client.handshake.query.id as string;
     const name = client.handshake.query.name as string;
-    
+
     let player = this.users.get(oldId);
     if (player) {
       player.id = client.id;
@@ -40,7 +40,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
       player = new User(client.id, name);
     }
     this.users.set(client.id, player);
-    
+
     client.emit('clientConnected', client.id);
     this.logger.log(`Client connected: ${client.id}`);
   }
@@ -74,7 +74,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage(SocketEvents.JOIN_GAME)
-  handleJoinGame(client: Socket, payload: any): void{
+  handleJoinGame(client: Socket, payload: any): void {
     const user = this.users.get(client.id);
     if (!user) {
       throw new WsException('player_not_found');
@@ -141,7 +141,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage(SocketEvents.REFRESH_TILES)
-  handleRefreshTiles(client: Socket, payload: any): Array<unknown> {    
+  handleRefreshTiles(client: Socket, payload: any): Array<unknown> {
     const game = this.games.get(payload.gameId);
     if (!game) {
       throw new WsException('game_not_found');
@@ -153,5 +153,30 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     return player.tiles;
+  }
+
+  @SubscribeMessage(SocketEvents.PLACE_TILE)
+  handlePlaceTile(client: Socket, payload: any): Object {
+    const user = this.users.get(client.id);
+    if (!user) {
+      throw new WsException('player_not_found');
+    }
+
+    const game = this.games.get(payload.gameId);
+    if (!game) {
+      throw new WsException('game_not_found');
+    }
+
+    const move = new Move(user, payload.tile);
+    try {
+      game.makeMove(move);
+    } catch (e) {
+      return { success: false, msg: e.message };
+    }
+
+    const event = 'gameStateChanged';
+    this.server.to(payload.gameId).emit(event, game.getEmittableState());
+
+    return { success: true, msg: "" };
   }
 }

@@ -22,7 +22,7 @@ export class Player implements IEmittable{
     }
 
     get tiles(): Tile[] {
-        return this._tiles;
+        return [...this._tiles];
     }
 
     get ready(): boolean {
@@ -53,6 +53,10 @@ export class Player implements IEmittable{
         if (this.canDrawTile()) {
             this._tiles.push(tile);
         }
+    }
+
+    hasTile(tile: Tile) {
+        return this._tiles.some((t: Tile) => t.equals(tile));
     }
 
     canDrawTile(): boolean {

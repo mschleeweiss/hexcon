@@ -57,7 +57,8 @@
             :key="cell"
             xlink:href="#pod"
             :transform="calcTransformation(cell.coords)"
-            @mouseover="mouseover(cell)"
+            @mouseover="visualizeTile(cell)"
+            @click="makeMove(cell)"
           />
         </g>
       </svg>
@@ -160,6 +161,11 @@ export default {
       default: () => [],
     },
   },
+  watch: {
+    playerTiles() {
+      this.selectedTile = undefined;
+    }
+  },
   data() {
     return {
       colorKeys: {
@@ -243,7 +249,7 @@ export default {
         event.preventDefault();
       }
     },
-    mouseover(firstCell) {
+    visualizeTile(firstCell) {
       if (!this.selectedTile) {
         return;
       }
@@ -266,6 +272,16 @@ export default {
         secondCell.type = this.selectedTile.second;
       }
     },
+    makeMove(firstCell) {
+      if (!this.selectedTile) {
+        return;
+      }
+
+      const firstHex = this.cellToHex(firstCell);
+      const secondHex = firstHex.neighbor(this.selectedTileDirection);
+      const secondCell = this.hexToCell(secondHex);
+      this.$emit("make-move", { firstCell, secondCell });
+    }
   },
   mounted() {
     this.$emit('mounted');
@@ -302,7 +318,7 @@ export default {
   flex-direction: column;
   align-items: center;
   width: 20%;
-  min-width: 15rem;
+  min-width: 6rem;
   opacity: 0.5;
   transition: all 0.5s ease;
 }
