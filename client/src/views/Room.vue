@@ -85,6 +85,8 @@ export default {
         console.log(resp);
         if (resp.success) {
           this.refreshTiles();
+        } else {
+          alert(resp.msg);
         }
       });
     },

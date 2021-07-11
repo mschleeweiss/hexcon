@@ -30,4 +30,11 @@ export class Score implements IEmittable {
         const intermediateResult = Math.min(this._values.get(color) + value, Score.MAX_VALUE);
         this._values.set(color, intermediateResult);
     }
+
+    getFullPointsCount(): number {
+        return Array
+            .from(this._values.values())
+            .map((points: number) => points >= Score.MAX_VALUE)
+            .filter(Boolean).length;
+    }
 }

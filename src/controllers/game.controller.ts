@@ -21,6 +21,7 @@ export class GameController implements IEmittable {
     private _active: boolean = false;
     private _over: boolean = false;
     private _currentPlayer: Player;
+    private _moves: Move[] = [];
 
     constructor(admin: User) {
         this._admin = admin;
@@ -86,8 +87,8 @@ export class GameController implements IEmittable {
 
         this._active = true;
         this._board = new Board(this._players.length);
+        this.drawPlayerTiles();
         this.determineCurrentPlayer();
-        this.initPlayerTiles();
     }
 
     makeMove(move: Move) {
@@ -102,19 +103,32 @@ export class GameController implements IEmittable {
         if (!this._board.areCellsFree(move.cells) || !this._board.areCellsNeighbors(move.cells)) {
             throw new Error ('invalid_move')
         }
-        
+
+        if (this._moves.length < this._players.length) {
+            if (!this._board.areCellsAttachedToCorner(move.cells)) {
+                throw new Error('invalid_move_first_round')
+            }
+        }
+
+        this._moves.push(move);
         const scoreMap = this._board.calculateScorepoints(move.cells, move.tile);
         const originalTile = this._currentPlayer.takeTile(move.tile.first, move.tile.second);
 
         this._board.updateCell(move.cells[0], originalTile.first);
         this._board.updateCell(move.cells[1], originalTile.second);
 
+        const fullPointsCountBeforeApplyingMove = this._currentPlayer.score.getFullPointsCount();
+
         scoreMap.forEach((value: number, color: TileType) => {
             this._currentPlayer.score.incrementScore(color, value);
-        })
+        });
 
-        // determine current player (may be the same if has extra move)
-        // return error/success for callback
+        const fullPointsCountAfterApplyingMove = this._currentPlayer.score.getFullPointsCount();
+
+        if (fullPointsCountBeforeApplyingMove === fullPointsCountAfterApplyingMove) {
+            this.drawPlayerTiles();
+            this.determineCurrentPlayer();
+        }
     }
 
     private updateGameStartable(): void {
@@ -128,12 +142,12 @@ export class GameController implements IEmittable {
             this._currentPlayer = this._players[0];
         } else {
             const idx = this._players.indexOf(this._currentPlayer);
-            const newIdx = idx + 1 % this._players.length;
+            const newIdx = (idx + 1) % this._players.length;
             this._currentPlayer = this._players[newIdx];
         }
     }
 
-    private initPlayerTiles() {
+    private drawPlayerTiles() {
         this._players.forEach((player: Player) => {
             while (player.canDrawTile()) {
                 const tile = this._pouch.drawTile();
@@ -141,6 +155,7 @@ export class GameController implements IEmittable {
             }
         })
     }
+
 
     private generateId(length: number): string {
         const result = [];

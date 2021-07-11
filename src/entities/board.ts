@@ -8,6 +8,8 @@ export class Board implements IEmittable {
     private _playerCount: number;
     private _map: Map<Hex, TileType> = new Map();
     private _hexagons: Hex[] = [];
+    // boolean means "has only empty neighbors"
+    private _cornerCells: Map<Hex, boolean> = new Map();
 
     constructor(playerCount: number) {
         this._playerCount = playerCount;
@@ -33,9 +35,28 @@ export class Board implements IEmittable {
         return cells[0].distance(cells[1]) === 1;
     }
 
+    areCellsAttachedToCorner(cells: [Hex, Hex]): boolean {
+        return cells.some((cell: Hex) => {
+            return Array
+                .from(this._cornerCells)
+                .filter((val: [Hex, boolean]) => val[1])
+                .some((val: [Hex, boolean]) => val[0].distance(cell) === 1)
+        })
+    }
+
     updateCell(cell: Hex, type: TileType): void {
         const origCell = this.getOriginalHex(cell);
         this._map.set(origCell, type);
+
+        // update list of corner cells
+        const cornerNeighbor = Array
+        .from(this._cornerCells)
+        .filter((val: [Hex, boolean]) => val[1])
+        .find((val: [Hex, boolean]) => val[0].distance(cell) === 1);
+
+        if (cornerNeighbor) {
+            this._cornerCells.set(cornerNeighbor[0], false);
+        }
     }
 
     calculateScorepoints(cells: [Hex, Hex], tile: Tile): Map<TileType, number> {
@@ -71,9 +92,13 @@ export class Board implements IEmittable {
             const rHigh = Math.min(mapRadius, -q + mapRadius);
             for (let r = rLow; r <= rHigh; r++) {
                 const hex = new Hex(q, r, -q - r);
-                const tileType = this.isCorner(hex) ? cornerTiles.pop() : TileType.EMPTY;
+                const isCorner = this.isCorner(hex);
+                const tileType = isCorner ? cornerTiles.pop() : TileType.EMPTY;
                 this._map.set(hex, tileType);
                 this._hexagons.push(hex);
+                if (this.isCorner(hex)) {
+                    this._cornerCells.set(hex, true);
+                }
             }
         }
     }
