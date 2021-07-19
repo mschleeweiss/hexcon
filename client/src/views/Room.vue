@@ -14,19 +14,19 @@
       @make-move="syncMove"
       @swap="syncSwap"
     />
-    <div
-      v-if="showGameOver"
-      class="hc-mask hc-gameover"
-      :class="{
-        success: game?.winner._user.id === socketId,
-        error: game?.winner._user.id !== socketId,
-      }"
-    >
-      <h1 class="hc-title hc-nova">Game Over</h1>
-      <p v-if="game?.winner._user.id === socketId">You won :)</p>
-      <p v-if="game?.winner._user.id !== socketId">
-        You lost :( The winner of this match is {{ game?.winner._user.name }}.
-      </p>
+    <div v-if="showGameOver" class="hc-mask hc-gameover">
+      <div
+        :class="{
+          success: game?.winner._user.id === socketId,
+          error: game?.winner._user.id !== socketId,
+        }"
+      >
+        <h1 class="hc-title hc-nova">Game Over</h1>
+        <p v-if="game?.winner._user.id === socketId">You won :)</p>
+        <p v-if="game?.winner._user.id !== socketId">
+          You lost :( The winner of this match is {{ game?.winner._user.name }}.
+        </p>
+      </div>
     </div>
   </div>
 </template>
@@ -142,12 +142,28 @@ export default {
   align-items: center;
   text-shadow: 2px 2px 3px #000;
 
-  & > h1 {
+  & > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+
+    &.success {
+      background-color: rgba($green, 0.5);
+    }
+    &.error {
+      background-color: rgba($red, 0.5);
+    }
+  }
+
+  & h1 {
     font-size: 4rem;
   }
 
-  & > p {
+  & p {
     font-size: 1.5rem;
+    font-weight: 900;
   }
 }
 </style>

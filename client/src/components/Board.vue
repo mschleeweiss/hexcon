@@ -68,10 +68,7 @@
             :class="[
               calcColor(cell.type),
               {
-                active:
-                  (cell.type === 0 || cell.temp) &&
-                  currentPlayer.user?.id === socketId &&
-                  state === 'awaitingMove',
+                active: (cell.type === 0 || cell.temp) && calcActive(),
                 temp: cell.temp,
               },
             ]"
@@ -86,13 +83,11 @@
       </svg>
     </div>
     <!-- right div -->
-    <div
-      class="hc-tile-container"
-      :class="{ active: currentPlayer.user?.id === socketId }"
-    >
+    <div class="hc-tile-container" :class="{ active: calcActive() }">
       <div v-for="tile in playerTiles" :key="tile">
         <svg
           class="hc-tile"
+          :pointer-events="calcActive() ? 'visiblePainted' : 'none'"
           :viewBox="tileViewBox"
           @click="selectedTile = tile"
         >
@@ -255,6 +250,13 @@ export default {
     },
   },
   methods: {
+    calcActive() {
+      debugger;
+      return (
+        this.currentPlayer.user?.id === this.socketId &&
+        this.state === 'awaitingMove'
+      );
+    },
     calcColor(id) {
       return this.colorKeys[id];
     },
@@ -367,6 +369,7 @@ export default {
 
 .hc-tile-container svg {
   height: 3rem;
+  cursor: pointer;
 }
 
 .hc-selected-tile-container {
@@ -391,29 +394,31 @@ export default {
   fill: $current-line;
   stroke-width: 0.5rem;
   transition: all 0.5s ease;
-}
 
-.hc-cell use.active:hover {
-  cursor: pointer;
-}
-
-.hc-cell use.red {
-  fill: $red;
-}
-.hc-cell use.green {
-  fill: $green;
-}
-.hc-cell use.yellow {
-  fill: $yellow;
-}
-.hc-cell use.purple {
-  fill: $purple;
-}
-.hc-cell use.orange {
-  fill: $orange;
-}
-.hc-cell use.blue {
-  fill: $cyan;
+  &.active:hover {
+    cursor: pointer;
+  }
+  &.red {
+    fill: $red;
+  }
+  &.green {
+    fill: $green;
+  }
+  &.yellow {
+    fill: $yellow;
+  }
+  &.purple {
+    fill: $purple;
+  }
+  &.orange {
+    fill: $orange;
+  }
+  &.blue {
+    fill: $cyan;
+  }
+  &.temp {
+    opacity: 0.6;
+  }
 }
 
 .hc-scorepanel {
@@ -444,40 +449,34 @@ export default {
   width: 0.75rem;
   margin-right: 0.125rem;
   opacity: calc(0.4 + (0.6 / 18) * var(--point));
+
+  &.red {
+    background-color: $red;
+  }
+  &.green {
+    background-color: $green;
+  }
+  &.yellow {
+    background-color: $yellow;
+  }
+  &.purple {
+    background-color: $purple;
+  }
+  &.orange {
+    background-color: $orange;
+  }
+  &.blue {
+    background-color: $cyan;
+  }
+  &:not(.active):not(.hc-score-id) {
+    background-color: $current-line;
+    opacity: 0.5;
+  }
 }
 
 .hc-score-id {
   border: 1px solid $foreground;
   margin-right: 0.5rem;
-}
-
-.hc-scorepoint.red {
-  background-color: $red;
-}
-
-.hc-scorepoint.green {
-  background-color: $green;
-}
-
-.hc-scorepoint.yellow {
-  background-color: $yellow;
-}
-
-.hc-scorepoint.purple {
-  background-color: $purple;
-}
-
-.hc-scorepoint.orange {
-  background-color: $orange;
-}
-
-.hc-scorepoint.blue {
-  background-color: $cyan;
-}
-
-.hc-scorepoint:not(.active):not(.hc-score-id) {
-  background-color: $current-line;
-  opacity: 0.5;
 }
 
 @keyframes rotate {
