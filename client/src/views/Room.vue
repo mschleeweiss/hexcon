@@ -5,13 +5,29 @@
     <Lobby v-if="showLobby" :game="game" />
     <Board
       v-if="showBoard"
+      :state="game?.state"
       :map="map"
       :players="players"
       :currentPlayer="game?.currentPlayer"
       :playerTiles="playerTiles"
       @mounted="refreshTiles"
       @make-move="syncMove"
+      @swap="syncSwap"
     />
+    <div
+      v-if="showGameOver"
+      class="hc-mask hc-gameover"
+      :class="{
+        success: game?.winner._user.id === socketId,
+        error: game?.winner._user.id !== socketId,
+      }"
+    >
+      <h1 class="hc-title hc-nova">Game Over</h1>
+      <p v-if="game?.winner._user.id === socketId">You won :)</p>
+      <p v-if="game?.winner._user.id !== socketId">
+        You lost :( The winner of this match is {{ game?.winner._user.name }}.
+      </p>
+    </div>
   </div>
 </template>
 
@@ -51,16 +67,18 @@ export default {
       return (
         !this.notFound &&
         !this.roomFull &&
-        !this.game?.active &&
-        !this.game?.over
+        ['lobby', 'startable'].includes(this.game?.state)
       );
     },
     showBoard() {
       return (
         !this.notFound &&
         !this.roomFull &&
-        (this.game?.active || this.game?.over)
+        ['awaitingMove', 'awaitingSwap', 'over'].includes(this.game?.state)
       );
+    },
+    showGameOver() {
+      return !this.notFound && !this.roomFull && this.game?.state === 'over';
     },
     socketId() {
       return this.$store.state.socketId;
@@ -82,13 +100,19 @@ export default {
     syncMove(tile) {
       const data = { gameId: this.gameId, tile };
       this.$socket.client.emit('placeTile', data, (resp) => {
-        console.log(resp);
         if (resp.success) {
           this.refreshTiles();
         } else {
           alert(resp.msg);
         }
       });
+    },
+    syncSwap(shouldSwap) {
+      const data = { gameId: this.gameId, shouldSwap };
+      const ack = (tiles) => {
+        this.playerTiles = tiles;
+      };
+      this.$socket.client.emit('swapTiles', data, ack);
     },
   },
   sockets: {
@@ -106,5 +130,24 @@ export default {
 <style lang="scss" scoped>
 .hc-room {
   height: 100%;
+}
+
+.hc-gameover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-shadow: 2px 2px 3px #000;
+
+  & > h1 {
+    font-size: 4rem;
+  }
+
+  & > p {
+    font-size: 1.5rem;
+  }
 }
 </style>

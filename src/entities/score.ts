@@ -17,13 +17,15 @@ export class Score implements IEmittable {
 
 
     getEmittableState(): Object {
-        const values = Array
+        return {
+            values: this.values
+        };
+    }
+
+    get values(): { type: TileType; value: number }[] {
+        return Array
             .from(this._values)
             .map((val: [TileType, number]) => ({ type: val[0], value: val[1] }));
-
-        return {
-            values
-        };
     }
 
     incrementScore(color: TileType, value: number) {
@@ -36,5 +38,11 @@ export class Score implements IEmittable {
             .from(this._values.values())
             .map((points: number) => points >= Score.MAX_VALUE)
             .filter(Boolean).length;
+    }
+
+    isMaxed(): boolean {
+        return Array
+            .from(this._values.values())
+            .every((points: number) => points >= Score.MAX_VALUE);
     }
 }

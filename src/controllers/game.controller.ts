@@ -17,11 +17,10 @@ export class GameController implements IEmittable {
     private _players: Player[] = [];
     private _board: Board;
     private _pouch: Pouch = new Pouch();
-    private _startable: boolean = false;
-    private _active: boolean = false;
-    private _over: boolean = false;
     private _currentPlayer: Player;
+    private _winner: Player;
     private _moves: Move[] = [];
+    private _state: GameState = GameState.LOBBY;
 
     constructor(admin: User) {
         this._admin = admin;
@@ -43,9 +42,8 @@ export class GameController implements IEmittable {
             players: this._players.map((player: Player) => player.getEmittableState()),
             currentPlayer: this._currentPlayer?.getEmittableState(),
             board: this._board?.getEmittableState(),
-            startable: this._startable,
-            active: this._active,
-            over: this._over,
+            state: this._state,
+            winner: this._winner
         };
     }
 
@@ -57,7 +55,7 @@ export class GameController implements IEmittable {
                 throw new Error('room_full');
             }
 
-            if (this._active || this._over) {
+            if (![GameState.LOBBY, GameState.STARTABLE].includes(this._state)) {
                 throw new Error('game_already_in_progress');
             }
 
@@ -67,10 +65,10 @@ export class GameController implements IEmittable {
     }
 
     changeReadiness(user: User) {
-        if (this._active || this._over) {
+        if (![GameState.LOBBY, GameState.STARTABLE].includes(this._state)) {
             return;
         }
-        
+
         const player = this._players.find((player: Player) => player.user.equals(user));
         player.ready = !player.ready;
         this.updateGameStartable();
@@ -81,17 +79,20 @@ export class GameController implements IEmittable {
             throw new Error('unauthorized');
         }
 
-        if (!this._startable) {
+        if (this._state !== GameState.STARTABLE) {
             throw new Error('unauthorized');
         }
 
-        this._active = true;
+        this._state = GameState.AWAITING_MOVE;
         this._board = new Board(this._players.length);
         this.drawPlayerTiles();
         this.determineCurrentPlayer();
     }
 
     makeMove(move: Move) {
+        if (this._state !== GameState.AWAITING_MOVE) {
+            throw new Error('wrong_action');
+        }
         if (this._currentPlayer.user !== move.user) {
             throw new Error('unauthorized');
         }
@@ -101,12 +102,16 @@ export class GameController implements IEmittable {
         }
 
         if (!this._board.areCellsFree(move.cells) || !this._board.areCellsNeighbors(move.cells)) {
-            throw new Error ('invalid_move')
+            throw new Error('invalid_move')
         }
 
         if (this._moves.length < this._players.length) {
             if (!this._board.areCellsAttachedToCorner(move.cells)) {
                 throw new Error('invalid_move_first_round')
+            }
+        } else {
+            if (!this._board.areCellsAttachedToNonEmptyCell(move.cells)) {
+                throw new Error('invalid_move_other_rounds')
             }
         }
 
@@ -123,18 +128,53 @@ export class GameController implements IEmittable {
             this._currentPlayer.score.incrementScore(color, value);
         });
 
-        const fullPointsCountAfterApplyingMove = this._currentPlayer.score.getFullPointsCount();
-
-        if (fullPointsCountBeforeApplyingMove === fullPointsCountAfterApplyingMove) {
-            this.drawPlayerTiles();
-            this.determineCurrentPlayer();
+        if (this.determineWinner()) {
+            this._state = GameState.OVER;
+            return;
         }
+
+        const fullPointsCountAfterApplyingMove = this._currentPlayer.score.getFullPointsCount();
+        const hasPlayerExtraMove = fullPointsCountBeforeApplyingMove !== fullPointsCountAfterApplyingMove;
+
+        if (hasPlayerExtraMove) {
+            return;
+        }
+
+        if (this.canCurrentPlayerSwap()) {
+            this._state = GameState.AWAITING_SWAP;
+            return;
+        }
+
+        this.drawPlayerTiles();
+        this.determineCurrentPlayer();
+    }
+
+
+    swapTiles(user: User, shouldSwap: boolean) {
+        if (this._currentPlayer.user.id !== user.id) {
+            throw new Error('unauthorized');
+        }
+
+        let returnedTiles = [];
+        if (shouldSwap) {
+            returnedTiles = this._currentPlayer.returnAllTiles();
+        }
+
+        this.drawPlayerTiles();
+
+        if (shouldSwap) {
+            this._pouch.giveBackTiles(returnedTiles)
+        }
+        this.determineCurrentPlayer();
+        this._state = GameState.AWAITING_MOVE;
     }
 
     private updateGameStartable(): void {
-        this._startable = GameController.MIN_PLAYERS <= this._players.length
+        const isStartable = GameController.MIN_PLAYERS <= this._players.length
             && this._players.length <= GameController.MAX_PLAYERS
             && this._players.every((player: Player) => player.ready);
+
+        this._state = isStartable ? GameState.STARTABLE : GameState.LOBBY;
     }
 
     private determineCurrentPlayer(): void {
@@ -147,6 +187,28 @@ export class GameController implements IEmittable {
         }
     }
 
+    private canCurrentPlayerSwap(): boolean {
+        const scoreValues = this._currentPlayer.score.values;
+        const tiles = this._currentPlayer.tiles;
+
+        scoreValues.sort((a, b) => {
+            if (a.value < b.value) {
+                return -1;
+            }
+            if (a.value > b.value) {
+                return 1;
+            }
+            return 0;
+        });
+
+        const minScore = Math.min(...scoreValues.map((a) => a.value));
+        const canSwap = scoreValues
+            .filter((v) => v.value === minScore)
+            .every((v) => !tiles.some((t) => t.first === v.type || t.second === v.type));
+
+        return canSwap;
+    }
+
     private drawPlayerTiles() {
         this._players.forEach((player: Player) => {
             while (player.canDrawTile()) {
@@ -154,6 +216,50 @@ export class GameController implements IEmittable {
                 player.addTile(tile);
             }
         })
+    }
+
+    private determineWinner() {
+        let winner = this._players.find((p: Player) => p.score.isMaxed());
+
+        if (winner) {
+            this._winner = winner;
+            return true;
+        }
+
+        if (this._board.isFull()) {
+            const playerValues = this.players
+                .map((p: Player) => p.score.values.map((val) => val.value));
+
+            playerValues.forEach((scoreValues) => scoreValues.sort((a, b) => a - b));
+
+            const valuePlayers = this.transpose(playerValues);
+            const loserIdxs = [];
+            for (let i = 0; i < valuePlayers.length; ++i) {
+                const values = valuePlayers[i];
+                const maxIdx = this.findMaxIdx(values, loserIdxs);
+                for (let j = 0; j < values.length; ++j) {
+                    if (loserIdxs.includes(j)) {
+                        continue;
+                    }
+                    const value = values[j];
+                    if (value < values[maxIdx]) {
+                        loserIdxs.push(j);
+                    }
+                }
+                if (loserIdxs.length = this.players.length - 1) {
+                    break;
+                }
+            }
+
+            const playerIdxs = [...Array(this._players.length).keys()];
+            const winnerIdxs = playerIdxs.filter(x => !loserIdxs.includes(x));
+            const winnerIdx = winnerIdxs[0];
+
+            this._winner = this._players[winnerIdx];
+            return true;
+        }
+
+        return false;
     }
 
 
@@ -168,4 +274,31 @@ export class GameController implements IEmittable {
         }
         return result.join('');
     }
+
+    private transpose(array: Array<Array<any>>): Array<Array<any>> {
+        return array.reduce((r, a) => a.map((v, i) => [...(r[i] || []), v]), []);
+    } 
+
+    private findMaxIdx(array: number[], excludeIdx: number[]) {
+        let maxIdx = -1;
+        let max = -Infinity;
+        for (let i = 0; i < array.length; ++i) {
+            if (!excludeIdx.includes(i)) {
+                if (array[i] > max) {
+                    max = array[i];
+                    maxIdx = i;
+                }
+            }
+        }
+        return maxIdx;
+    }
 }
+
+export const enum GameState {
+    LOBBY = "lobby",
+    STARTABLE = "startable",
+    AWAITING_MOVE = "awaitingMove",
+    AWAITING_SWAP = "awaitingSwap",
+    OVER = "over",
+}
+

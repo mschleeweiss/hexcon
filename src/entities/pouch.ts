@@ -9,12 +9,21 @@ export class Pouch {
         this.generatePouch();
     }
 
+    get size(): number {
+        return this._tiles.length;
+    }
+
     drawTile() {
         if (this._tiles.length < 1) {
             throw new Error("pouch_empty"); 
         }
 
         return this._tiles.pop();
+    }
+
+    giveBackTiles(tiles: Tile[]) {
+        this._tiles.push(...tiles);
+        this.shuffle(this._tiles);
     }
 
     private generatePouch(): void {

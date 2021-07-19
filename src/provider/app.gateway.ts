@@ -179,4 +179,29 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     return { success: true, msg: "" };
   }
+
+  @SubscribeMessage(SocketEvents.SWAP_TILES)
+  handleSwapTiles(client: Socket, payload: any): Array<unknown>  {
+    const user = this.users.get(client.id);
+    if (!user) {
+      throw new WsException('player_not_found');
+    }
+
+    const game = this.games.get(payload.gameId);
+    if (!game) {
+      throw new WsException('game_not_found');
+    }
+
+    game.swapTiles(user, payload.shouldSwap);
+
+    const player = game.players.find((player: Player) => player.user.id === client.id);
+    if (!player) {
+      throw new WsException('player_not_found');
+    }
+    
+    const event = 'gameStateChanged';
+    this.server.to(payload.gameId).emit(event, game.getEmittableState());
+
+    return player.tiles;
+  }
 }

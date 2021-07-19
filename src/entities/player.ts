@@ -22,7 +22,7 @@ export class Player implements IEmittable{
     }
 
     get tiles(): Tile[] {
-        return [...this._tiles];
+        return this._tiles;
     }
 
     get ready(): boolean {
@@ -70,6 +70,12 @@ export class Player implements IEmittable{
             // error
         }
         return this._tiles.splice(idx, 1)[0];
+    }
+
+    returnAllTiles(): Tile[] {
+        const tiles = [...this.tiles];
+        this._tiles.length = 0;
+        return tiles;
     }
   }
   

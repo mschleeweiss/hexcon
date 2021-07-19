@@ -47,7 +47,7 @@
           v-if="socketId === adminId"
           class="hc-btn hc-btn-outline hc-nova hc-success"
           @click="startGame"
-          :disabled="!game.startable"
+          :disabled="game.state === 'lobby'"
         >
           start game
         </button>

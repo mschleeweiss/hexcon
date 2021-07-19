@@ -44,15 +44,38 @@ export class Board implements IEmittable {
         })
     }
 
+    isFull(): boolean {
+        for (let [key, value] of this._map) {
+            if (value === TileType.EMPTY) {
+                const neighbors = key.neighbors().map(neighbor => this.getOriginalHex(neighbor));
+                for (let i = 0; i < neighbors.length; ++i) {
+                    if (this._map.get(neighbors[i]) === TileType.EMPTY) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    areCellsAttachedToNonEmptyCell(cells: [Hex, Hex]): boolean {
+        return cells.some((cell: Hex) => {
+            return cell.neighbors()
+                .map(neighbor => this.getOriginalHex(neighbor))
+                .map(neighbor => this._map.get(neighbor))
+                .some(type => type !== undefined && type !== TileType.EMPTY);
+        })
+    }
+
     updateCell(cell: Hex, type: TileType): void {
         const origCell = this.getOriginalHex(cell);
         this._map.set(origCell, type);
 
         // update list of corner cells
         const cornerNeighbor = Array
-        .from(this._cornerCells)
-        .filter((val: [Hex, boolean]) => val[1])
-        .find((val: [Hex, boolean]) => val[0].distance(cell) === 1);
+            .from(this._cornerCells)
+            .filter((val: [Hex, boolean]) => val[1])
+            .find((val: [Hex, boolean]) => val[0].distance(cell) === 1);
 
         if (cornerNeighbor) {
             this._cornerCells.set(cornerNeighbor[0], false);

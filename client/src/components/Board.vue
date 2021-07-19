@@ -1,5 +1,28 @@
 <template>
   <div class="hc-board">
+    <Dialog
+      v-if="currentPlayer.user?.id === socketId && state === 'awaitingSwap'"
+    >
+      <template v-slot:header> Swap all tiles? </template>
+      <template v-slot:body>
+        You have no tiles with the color of your lowest scoring color.<br /><br />Do
+        you want to return all of your current tiles and draw new ones?
+      </template>
+      <template v-slot:footer>
+        <button
+          class="hc-btn hc-btn-outline hc-nova hc-emphasized"
+          @click="submitSwapDecision(true)"
+        >
+          Swap all tiles
+        </button>
+        <button
+          class="hc-btn hc-btn-outline hc-nova"
+          @click="submitSwapDecision(false)"
+        >
+          Resume
+        </button>
+      </template>
+    </Dialog>
     <!-- left div -->
     <div class="hc-stats-container">
       <div
@@ -26,10 +49,7 @@
             v-for="point in scorePoints"
             :key="point"
             class="hc-scorepoint"
-            :class="[
-              calcColor(score.type),
-              { active: point <= score.value },
-            ]"
+            :class="[calcColor(score.type), { active: point <= score.value }]"
             :style="`--point:${point}`"
           />
         </div>
@@ -50,7 +70,9 @@
               {
                 active:
                   (cell.type === 0 || cell.temp) &&
-                  currentPlayer.user?.id === socketId,
+                  currentPlayer.user?.id === socketId &&
+                  state === 'awaitingMove',
+                temp: cell.temp,
               },
             ]"
             v-for="cell in map"
@@ -58,7 +80,7 @@
             xlink:href="#pod"
             :transform="calcTransformation(cell.coords)"
             @mouseover="visualizeTile(cell)"
-            @click="makeMove(cell)"
+            @click="makeMove($event, cell)"
           />
         </g>
       </svg>
@@ -136,10 +158,19 @@
 
 <script>
 import { Hex, Layout, Point } from '@/hex';
+import Dialog from '@/components/Dialog.vue';
 
 export default {
   name: 'Board',
+  components: {
+    Dialog,
+  },
   props: {
+    state: {
+      type: String,
+      required: true,
+      default: '',
+    },
     map: {
       type: Array,
       required: true,
@@ -164,7 +195,7 @@ export default {
   watch: {
     playerTiles() {
       this.selectedTile = undefined;
-    }
+    },
   },
   data() {
     return {
@@ -272,7 +303,11 @@ export default {
         secondCell.type = this.selectedTile.second;
       }
     },
-    makeMove(firstCell) {
+    makeMove(event, firstCell) {
+      if (!event.target.className.baseVal.includes('active')) {
+        return;
+      }
+
       if (!this.selectedTile) {
         return;
       }
@@ -280,8 +315,11 @@ export default {
       const firstHex = this.cellToHex(firstCell);
       const secondHex = firstHex.neighbor(this.selectedTileDirection);
       const secondCell = this.hexToCell(secondHex);
-      this.$emit("make-move", { firstCell, secondCell });
-    }
+      this.$emit('make-move', { firstCell, secondCell });
+    },
+    submitSwapDecision(swap) {
+      this.$emit('swap', swap);
+    },
   },
   mounted() {
     this.$emit('mounted');
@@ -489,5 +527,9 @@ export default {
     background-color: $background;
     opacity: 1;
   }
+}
+
+.hc-btn {
+  margin-right: 0.5rem;
 }
 </style>

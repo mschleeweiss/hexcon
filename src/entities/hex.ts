@@ -43,6 +43,10 @@ export class Hex {
         return this.add(Hex.direction(direction));
     }
 
+    neighbors(): Hex[] {
+        return [...Array(Hex.directions.length).keys()].map(value => this.neighbor(value));
+    }
+
     len(): number {
         return (Math.abs(this.q) + Math.abs(this.r) + Math.abs(this.s)) / 2;
     }
