@@ -1,7 +1,11 @@
 <template>
   <div class="hc-room">
-    <NotFound v-if="notFound" />
-    <RoomFull v-if="roomFull" />
+    <MessagePage
+      v-if="exception"
+      :icon="getExceptionIcon()"
+      :title="getExceptionTitle()"
+      :messages="getExceptionMsgs()"
+    />
     <Lobby v-if="showLobby" :game="game" />
     <Board
       v-if="showBoard"
@@ -32,8 +36,7 @@
 </template>
 
 <script>
-import NotFound from '@/components/NotFound.vue';
-import RoomFull from '@/components/RoomFull.vue';
+import MessagePage from '@/components/MessagePage.vue';
 import Board from '@/components/Board.vue';
 import Lobby from '@/components/Lobby.vue';
 
@@ -42,15 +45,15 @@ export default {
   components: {
     Board,
     Lobby,
-    NotFound,
-    RoomFull,
+    MessagePage,
   },
   data() {
     return {
       game: {},
       playerTiles: [],
-      notFound: false,
-      roomFull: false,
+      notFoundException: false,
+      roomFullException: false,
+      exception: '',
     };
   },
   computed: {
@@ -65,20 +68,24 @@ export default {
     },
     showLobby() {
       return (
-        !this.notFound &&
-        !this.roomFull &&
+        !this.notFoundException &&
+        !this.roomFullException &&
         ['lobby', 'startable'].includes(this.game?.state)
       );
     },
     showBoard() {
       return (
-        !this.notFound &&
-        !this.roomFull &&
+        !this.notFoundException &&
+        !this.roomFullException &&
         ['awaitingMove', 'awaitingSwap', 'over'].includes(this.game?.state)
       );
     },
     showGameOver() {
-      return !this.notFound && !this.roomFull && this.game?.state === 'over';
+      return (
+        !this.notFoundException &&
+        !this.roomFullException &&
+        this.game?.state === 'over'
+      );
     },
     socketId() {
       return this.$store.state.socketId;
@@ -90,6 +97,39 @@ export default {
     });
   },
   methods: {
+    getExceptionIcon() {
+      const values = {
+        game_not_found: 'fas fa-exclamation-triangle',
+        room_full: 'fas fa-users-slash',
+        game_already_in_progress: 'fas fa-exclamation-triangle',
+      };
+      return values[this.exception];
+    },
+    getExceptionTitle() {
+      const values = {
+        game_not_found: 'Holup!',
+        room_full: 'Sorry :(',
+        game_already_in_progress: 'Too late!',
+      };
+      return values[this.exception];
+    },
+    getExceptionMsgs() {
+      const values = {
+        game_not_found: [
+          'The game you were looking for could not be found.',
+          "Maybe it expired. Maybe someone didn't copy and paste the link properly. Maybe we just restarted our servers. Maybe you should create your own game room ;)",
+        ],
+        room_full: [
+          'This game is already at full capacity. We support up to 4 players. With more players it would become unbalanced.',
+          'However you can create your own game room ;)',
+        ],
+        game_already_in_progress: [
+        'This game is already in progress.',
+        'However you can create your own game room ;)',
+      ],
+      };
+      return values[this.exception];
+    },
     refreshTiles() {
       const data = { gameId: this.gameId };
       const ack = (tiles) => {
@@ -120,8 +160,10 @@ export default {
       this.game = game;
     },
     exception(data) {
-      this.notFound = data.message === 'game_not_found';
-      this.roomFull = data.message === 'room_full';
+      this.exception = data.message;
+      this.notFoundException = data.message === 'game_not_found';
+      this.roomFullException = data.message === 'room_full';
+      this.gameRunningException = data.message === 'game_already_in_progress';
     },
   },
 };
