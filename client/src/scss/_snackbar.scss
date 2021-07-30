@@ -1,24 +1,39 @@
 .hc-snackbar {
     visibility: hidden;
-    min-width: 250px;
-    text-align: left;
+    min-width: 300px;
     border-radius: 2px;
     padding: 1rem;
     position: fixed;
     z-index: 2;
-    left: 0;
-    top: calc(50% - 1.5rem);
     font-size: 1rem;
     box-shadow: 0 5px 10px 0 rgb(0 0 0 / 15%);
     opacity: 0.9;
+
+    &.left {
+        left: 0;
+        top: calc(50% - 1.5rem);
+        text-align: left;
+
+        &.show {
+            visibility: visible;
+            animation: fadeinleft 0.5s, fadeoutleft 0.5s 3.5s;
+        }
+    }
+
+    &.top {
+        left: calc(50% - 150px);
+        top: 30px;
+        text-align: center;
+
+        &.show {
+            visibility: visible;
+            animation: fadeintop 0.5s, fadeouttop 0.5s 3.5s;
+        }
+    }
 }
-.hc-snackbar.show {
-    visibility: visible;
-    animation: fadein 0.5s, fadeout 0.5s 3.5s;
-}
-@keyframes fadein {
+@keyframes fadeinleft {
     from {
-        left: -250px;
+        left: -300px;
         opacity: 0;
     }
     to {
@@ -27,13 +42,36 @@
     }
 }
 
-@keyframes fadeout {
+@keyframes fadeoutleft {
     from {
         top: calc(50% - 1.5rem);
         opacity: 1;
     }
     to {
-        left: -250px;
+        left: -300px;
+        opacity: 0;
+    }
+}
+
+
+@keyframes fadeintop {
+    from {
+        top: -30px;
+        opacity: 0;
+    }
+    to {
+        top: 30px;
+        opacity: 0.9;
+    }
+}
+
+@keyframes fadeouttop {
+    from {
+        top: 30px;
+        opacity: 1;
+    }
+    to {
+        top: -30px;
         opacity: 0;
     }
 }

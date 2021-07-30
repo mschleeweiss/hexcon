@@ -1,6 +1,6 @@
 <template>
   <div class="hc-lobby">
-    <div class="hc-snackbar" :class="{ show: showSnackbar }">
+    <div class="hc-snackbar left" :class="{ show: showSnackbar }">
       <h4 class="hc-nova">Link copied!</h4>
       Send it to up to 3 other players.
     </div>

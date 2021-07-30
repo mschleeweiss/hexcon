@@ -26,7 +26,7 @@
     <!-- left div -->
     <div class="hc-stats-container">
       <div
-        class="hc-scorepanel hc-border"
+        class="hc-scorepanel hc-border-animated"
         :class="{ active: currentPlayer.user?.id === player.user.id }"
         v-for="player in players"
         :key="player.user.id"
@@ -52,6 +52,9 @@
             :class="[calcColor(score.type), { active: point <= score.value }]"
             :style="`--point:${point}`"
           />
+          <span>
+            {{ score.value }}
+          </span>
         </div>
       </div>
     </div>
@@ -84,67 +87,41 @@
     </div>
     <!-- right div -->
     <div class="hc-tile-container" :class="{ active: calcActive() }">
-      <div v-for="tile in playerTiles" :key="tile">
-        <svg
-          class="hc-tile"
-          :pointer-events="calcActive() ? 'visiblePainted' : 'none'"
-          :viewBox="tileViewBox"
-          @click="selectedTile = tile"
+      <div class="hc-playertiles hc-border">
+        <span class="hc-label">Your Tiles</span>
+        <div
+          v-for="tile in playerTiles"
+          :key="tile"
+          class="hc-playertile"
+          :class="{ selected: tile === selectedTile }"
         >
-          <defs>
-            <g id="pod">
-              <polygon :points="hexPoints" />
-            </g>
-          </defs>
-          <g class="hc-cell">
-            <use
-              :class="calcColor(tile.first)"
-              xlink:href="#pod"
-              :transform="calcTransformation({ q: 0, r: 0, s: 0 })"
-            />
-            <use
-              :class="calcColor(tile.second)"
-              xlink:href="#pod"
-              :transform="calcTransformation({ q: 1, r: 0, s: -1 })"
-            />
-          </g>
-        </svg>
-      </div>
-      <div
-        class="hc-selected-tile-container"
-        v-if="currentPlayer.user?.id === socketId"
-      >
-        <button
-          class="hc-btn hc-btn-outline hc-nova"
-          @click="rotateSelectedTile"
-        >
-          <i class="fas fa-redo"></i>
-        </button>
-        <div>
           <svg
-            v-if="!!selectedTile"
-            class="selected"
+            class="hc-tile"
+            :pointer-events="calcActive() ? 'visiblePainted' : 'none'"
             :viewBox="tileViewBox"
-            :transform="selectedTileRotation"
+            :transform="selectedTileRotation(tile)"
+            @click="selectedTile = tile"
           >
-            <defs>
-              <g id="pod">
-                <polygon :points="hexPoints" />
-              </g>
-            </defs>
             <g class="hc-cell">
               <use
-                :class="calcColor(selectedTile?.first)"
+                :class="calcColor(tile.first)"
                 xlink:href="#pod"
-                :transform="calcTransformation({ q: 0, r: 0, s: 0 })"
+                :transform="calcTransformation(defaultFirst)"
               />
               <use
-                :class="calcColor(selectedTile?.second)"
+                :class="calcColor(tile.second)"
                 xlink:href="#pod"
-                :transform="calcTransformation({ q: 1, r: 0, s: -1 })"
+                :transform="calcTransformation(defaultSecond)"
               />
             </g>
           </svg>
+          <button
+            v-if="tile === selectedTile"
+            class="hc-btn hc-btn-outline hc-nova"
+            @click="rotateSelectedTile"
+          >
+            <i class="fas fa-redo"></i>
+          </button>
         </div>
       </div>
     </div>
@@ -202,6 +179,8 @@ export default {
         5: 'orange',
         6: 'blue',
       },
+      defaultFirst: { q: 0, r: 0, s: 0 },
+      defaultSecond: { q: 1, r: 0, s: -1 },
       selectedTile: undefined,
       selectedTileDirection: 0,
     };
@@ -245,13 +224,9 @@ export default {
         .fill()
         .map((_, i) => i + 1);
     },
-    selectedTileRotation() {
-      return `rotate(-${60 * this.selectedTileDirection})`;
-    },
   },
   methods: {
     calcActive() {
-      debugger;
       return (
         this.currentPlayer.user?.id === this.socketId &&
         this.state === 'awaitingMove'
@@ -281,6 +256,12 @@ export default {
         cell.dispatchEvent(new Event('mouseover'));
         event.preventDefault();
       }
+    },
+    selectedTileRotation(tile) {
+      if (tile === this.selectedTile) {
+        return `rotate(-${60 * this.selectedTileDirection})`;
+      }
+      return '';
     },
     visualizeTile(firstCell) {
       if (!this.selectedTile) {
@@ -360,6 +341,7 @@ export default {
   width: 20%;
   min-width: 6rem;
   opacity: 0.5;
+  padding: 1rem;
   transition: all 0.5s ease;
 }
 
@@ -372,17 +354,44 @@ export default {
   cursor: pointer;
 }
 
-.hc-selected-tile-container {
-  margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-}
+.hc-playertiles {
+  padding-bottom: 0rem;
 
-.hc-selected-tile-container > div {
-  height: 6rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  & > div {
+    position: relative;
+    padding: 0rem 1rem;
+    transition: all 0.3s ease-in;
+
+    &:last-child:not(.selected) {
+      padding-bottom: 1rem;
+    }
+
+    &.selected {
+      height: 6rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: $comment;
+      margin: 0.5rem 0rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      & .hc-cell use {
+        stroke: $comment;
+      }
+    }
+
+    & > .hc-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      border: 0;
+      padding: 0.125rem;
+      margin: 0.25rem;
+    }
+  }
 }
 
 .hc-map-container svg {
@@ -393,7 +402,7 @@ export default {
   stroke: $background;
   fill: $current-line;
   stroke-width: 0.5rem;
-  transition: all 0.5s ease;
+  transition: fill 0.5s ease;
 
   &.active:hover {
     cursor: pointer;
@@ -442,11 +451,17 @@ export default {
 .hc-scorebar {
   display: flex;
   margin-bottom: 0.125rem;
+
+  & > span {
+    font-size: 0.6rem;
+    width: 0.9rem;
+    text-align: right;
+  }
 }
 
 .hc-scorepoint {
-  height: 0.75rem;
-  width: 0.75rem;
+  height: 0.7rem;
+  width: 0.7rem;
   margin-right: 0.125rem;
   opacity: calc(0.4 + (0.6 / 18) * var(--point));
 
@@ -486,6 +501,16 @@ export default {
 }
 
 .hc-border {
+  border: 2px solid $comment;
+  border-radius: 6px;
+  padding: 1rem 0rem;
+
+  &.hc-playertiles {
+    padding-bottom: 0rem;
+  }
+}
+
+.hc-border-animated {
   position: relative;
   z-index: 0;
   border-radius: 6px;
@@ -528,7 +553,13 @@ export default {
   }
 }
 
-.hc-btn {
-  margin-right: 0.5rem;
+.hc-label {
+  margin-top: -1.5rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  background-color: $background;
+  position: absolute;
+  padding: 0rem 0.25rem;
+  text-transform: uppercase;
 }
 </style>

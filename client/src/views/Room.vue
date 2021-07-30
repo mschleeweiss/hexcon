@@ -1,5 +1,9 @@
 <template>
   <div class="hc-room">
+    <div class="hc-snackbar top" :class="{ show: showSnackbar }">
+      <h4 class="hc-nova">Illegal move</h4>
+      {{ snackbarText }}
+    </div>
     <MessagePage
       v-if="exception"
       :icon="getExceptionIcon()"
@@ -54,6 +58,14 @@ export default {
       notFoundException: false,
       roomFullException: false,
       exception: '',
+      moveErrors: {
+        invalid_move_first_round:
+          'In the first round you have to place your tile in one of the corners. Each player has to chose a different corner.',
+        invalid_move_other_rounds:
+          'You have to place your tile next to another tile. It cannot be surrounded by empty fields.',
+      },
+      showSnackbar: false,
+      snackbarText: '',
     };
   },
   computed: {
@@ -124,9 +136,9 @@ export default {
           'However you can create your own game room ;)',
         ],
         game_already_in_progress: [
-        'This game is already in progress.',
-        'However you can create your own game room ;)',
-      ],
+          'This game is already in progress.',
+          'However you can create your own game room ;)',
+        ],
       };
       return values[this.exception];
     },
@@ -143,7 +155,9 @@ export default {
         if (resp.success) {
           this.refreshTiles();
         } else {
-          alert(resp.msg);
+          this.showSnackbar = true;
+          this.snackbarText = this.moveErrors[resp.msg];
+          window.setTimeout(() => (this.showSnackbar = false), 4000);
         }
       });
     },
@@ -172,6 +186,11 @@ export default {
 <style lang="scss" scoped>
 .hc-room {
   height: 100%;
+}
+
+.hc-snackbar {
+  background-color: $red;
+  width: 250px;
 }
 
 .hc-gameover {

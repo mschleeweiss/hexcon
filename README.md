@@ -1,9 +1,9 @@
 Todos:
 
-* [ ] Page when joining game already in progress
-* [ ] visu error when making wrong move
-* [ ] visu player tiles
-* [ ] visu selected tile
+* [x] Page when joining game already in progress
+* [x] visu error when making wrong move
+* [x] visu player tiles
+* [x] visu selected tile
 * [ ] visu when opponent has choice to swap
 * [ ] visu outcome of opponents swap choice (accepted/declined)
 * [ ] visu newly gained points

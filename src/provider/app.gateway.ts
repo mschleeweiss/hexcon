@@ -42,11 +42,11 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.users.set(client.id, player);
 
     client.emit('clientConnected', client.id);
-    this.logger.log(`Client connected: ${client.id}`);
+    this.logger.log(`${client.id} connected (previously ${oldId})`);
   }
 
   handleDisconnect(client: Socket) {
-    this.logger.log(`Client disconnected: ${client.id}`);
+    this.logger.log(`${client.id} disconnected: `);
   }
 
   @SubscribeMessage(SocketEvents.CHANGE_NAME)

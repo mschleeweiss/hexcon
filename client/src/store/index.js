@@ -7,6 +7,7 @@ if (!sessionStorage.socketId) {
 
 if (!localStorage.name) {
   localStorage.name = generateName()
+  localStorage.isNameGenerated = true;
 }
 
 export default createStore({
