@@ -325,6 +325,7 @@ export default {
   width: 20%;
   padding: 1rem;
   overflow: scroll;
+  background-color: $current-line;
 }
 
 .hc-map-container {
@@ -342,6 +343,7 @@ export default {
   min-width: 6rem;
   opacity: 0.5;
   padding: 1rem;
+  background-color: $current-line;
   transition: all 0.5s ease;
 }
 
@@ -355,6 +357,7 @@ export default {
 }
 
 .hc-playertiles {
+  background-color: $background;
   padding-bottom: 0rem;
 
   & > div {
@@ -525,12 +528,12 @@ export default {
     top: -100%;
     width: 200%;
     height: 300%;
-    background-color: $comment;
+    background-color: $current-line;
     background-repeat: no-repeat;
     background-size: 50% 50%, 50% 50%;
     background-position: 0 0, 100% 0, 100% 100%, 0 100%;
-    background-image: linear-gradient($comment, $comment),
-      linear-gradient($comment, $comment);
+    background-image: linear-gradient($current-line, $current-line),
+      linear-gradient($current-line, $current-line);
     opacity: 0.5;
   }
 
@@ -548,18 +551,23 @@ export default {
 
   &.active::before {
     animation: rotate 5s linear infinite;
-    background-color: $background;
+    background-color: $comment;
     opacity: 1;
   }
 }
 
 .hc-label {
   margin-top: -1.5rem;
+  margin-left: 1rem;
   font-size: 0.75rem;
   font-weight: 900;
   background-color: $background;
   position: absolute;
   padding: 0rem 0.25rem;
   text-transform: uppercase;
+}
+
+.hc-btn {
+  margin-left: 0.5rem;
 }
 </style>
