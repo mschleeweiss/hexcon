@@ -5,11 +5,9 @@ Todos:
 * [x] visu player tiles
 * [x] visu selected tile
 * [ ] visu when opponent has choice to swap
-* [ ] visu outcome of opponents swap choice (accepted/declined)
-* [ ] visu newly gained points
-* [ ] and/or add some kind of game log
+* [ ] add some kind of game log (players joined, points made, swap choice, winner)
 * [ ] check session handling
 * [ ] write short rule page
-* [ ] settings (change username)
-* [ ] ask to change username if is initial name
+* [x] settings (change username)
+* [ ] split playername and username?
 * [ ] about page

@@ -169,6 +169,10 @@ export class GameController implements IEmittable {
         this._state = GameState.AWAITING_MOVE;
     }
 
+    containsUser(user: User): boolean {
+        return this._players.some((player: Player) => player.user.equals(user))
+    }
+
     private updateGameStartable(): void {
         const isStartable = GameController.MIN_PLAYERS <= this._players.length
             && this._players.length <= GameController.MAX_PLAYERS

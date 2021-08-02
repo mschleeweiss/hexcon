@@ -57,6 +57,13 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     player.name = payload.name;
+
+    this.games.forEach((game: GameController, id: string) => {
+      if (game.containsUser(player)) {
+        const event = 'gameStateChanged';
+        this.server.to(id).emit(event, game.getEmittableState());
+      }
+    })
   }
 
   @SubscribeMessage(SocketEvents.CREATE_GAME)
@@ -181,7 +188,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage(SocketEvents.SWAP_TILES)
-  handleSwapTiles(client: Socket, payload: any): Array<unknown>  {
+  handleSwapTiles(client: Socket, payload: any): Array<unknown> {
     const user = this.users.get(client.id);
     if (!user) {
       throw new WsException('player_not_found');
@@ -198,7 +205,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!player) {
       throw new WsException('player_not_found');
     }
-    
+
     const event = 'gameStateChanged';
     this.server.to(payload.gameId).emit(event, game.getEmittableState());
 

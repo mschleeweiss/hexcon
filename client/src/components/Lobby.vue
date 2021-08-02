@@ -21,7 +21,33 @@
             <span v-if="player.ready" class="hc-tag success">Ready</span>
           </div>
           <div class="hc-player-info">
-            {{ player.user.name }}
+            <div class="hc-player-name">
+              <span v-if="!editUsername || socketId !== player.user.id">{{
+                player.user.name
+              }}</span>
+              <button
+                v-if="socketId === player.user.id && !editUsername"
+                class="hc-btn hc-btn-outline hc-nova"
+                @click="makeUsernameEditable"
+              >
+                <i class="fas fa-pen"></i>
+              </button>
+
+              <input
+                v-if="socketId === player.user.id && editUsername"
+                v-model="username"
+                @keyup.enter="saveUsername"
+                class="hc-input"
+                ref="username"
+              />
+              <button
+                v-if="socketId === player.user.id && editUsername"
+                class="hc-btn hc-btn-outline hc-nova"
+                @click="saveUsername"
+              >
+                <i class="fas fa-save"></i>
+              </button>
+            </div>
             <div v-if="socketId === player.user.id" class="hc-checkbox-wrapper">
               <input
                 class="hc-checkbox"
@@ -77,6 +103,8 @@ export default {
   data() {
     return {
       showSnackbar: false,
+      editUsername: false,
+      username: this.$store.state.name,
     };
   },
   computed: {
@@ -109,6 +137,17 @@ export default {
       document.body.removeChild(dummy);
       this.showSnackbar = true;
       window.setTimeout(() => (this.showSnackbar = false), 4000);
+    },
+    makeUsernameEditable() {
+      this.editUsername = true;
+      this.$nextTick(() => {
+        this.$refs.username.focus();
+      });
+    },
+    saveUsername() {
+      this.editUsername = false;
+      this.$store.commit('updateName', this.username);
+        this.$socket.client.emit('changeName', { name: this.username });
     },
     startGame() {
       this.$socket.client.emit('startGame', {
@@ -185,6 +224,19 @@ export default {
   padding: 0.25rem;
   font-weight: 900;
   justify-content: space-between;
+}
+
+.hc-player-name {
+  display: flex;
+  align-items: center;
+
+  & > .hc-btn {
+    border: 0;
+    padding: 0.125rem;
+    margin: 0.25rem;
+    font-size: 0.75rem;
+    color: lighten($comment, 10%);
+  }
 }
 
 .hc-checkbox-wrapper {
