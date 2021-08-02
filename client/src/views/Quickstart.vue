@@ -50,7 +50,7 @@ export default {
   text-align: center;
 }
 .hc-hero {
-  background-image: url('../assets/hero.jpeg');
+  background-image: url('~@/assets/hero.jpeg');
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
