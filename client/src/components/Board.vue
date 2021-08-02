@@ -60,6 +60,19 @@
     </div>
     <!-- center div -->
     <div class="hc-map-container">
+      <div
+        class="hc-snackbar top"
+        :class="{
+          show: state === 'awaitingSwap' && currentPlayer.user?.id !== socketId,
+          hide: state !== 'awaitingSwap' || currentPlayer.user?.id === socketId,
+        }"
+      >
+        <h4 class="hc-nova">
+          {{ currentPlayer.user?.name }} can swap all tiles
+        </h4>
+        They have no tile with their lowest color(s) and therefore have the
+        choice to return their current tiles and drawing completely new ones.
+      </div>
       <svg :viewBox="mapViewBox" @contextmenu="rotateSelectedTile">
         <defs>
           <g id="pod">
@@ -332,7 +345,13 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
   width: 70%;
+}
+
+.hc-snackbar {
+  background-color: $orange;
+  color: $background;
 }
 
 .hc-tile-container {

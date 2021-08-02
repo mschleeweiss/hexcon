@@ -1,6 +1,6 @@
 <template>
   <div class="hc-room">
-    <div class="hc-snackbar top" :class="{ show: showSnackbar }">
+    <div class="hc-snackbar top" :class="{ show: showSnackbar, hide: !showSnackbar }">
       <h4 class="hc-nova">Illegal move</h4>
       {{ snackbarText }}
     </div>
@@ -190,7 +190,7 @@ export default {
 
 .hc-snackbar {
   background-color: $red;
-  width: 250px;
+  width: 350px;
 }
 
 .hc-gameover {
