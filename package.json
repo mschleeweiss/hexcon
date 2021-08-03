@@ -10,7 +10,7 @@
     "build:client": "cd client && npm install && npm run build && cd ..",
     "build:server": "nest build",
     "build": "npm run build:server && npm run build:client && npm run copyclient",
-    "copyclient": "copyfiles --up 1 client/dist/* dist/client && copyfiles --up 1 client/dist/css/* dist/client && copyfiles --up 1 client/dist/js/* dist/client",
+    "copyclient": "copyfiles --up 1 client/dist/* dist/client && copyfiles --up 1 client/dist/css/* dist/client && copyfiles --up 1 client/dist/js/* dist/client && copyfiles --up 1 client/dist/img/* dist/client",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
