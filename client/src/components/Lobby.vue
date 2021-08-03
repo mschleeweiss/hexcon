@@ -210,12 +210,6 @@ export default {
 .hc-tag {
   margin-right: 0.25rem;
 }
-.hc-tag.error {
-  background-color: rgba($red, 0.6);
-}
-.hc-tag.success {
-  background-color: rgba($green, 0.6);
-}
 
 .hc-player-info {
   display: flex;

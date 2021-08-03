@@ -1,6 +1,6 @@
 <template>
   <div class="hc-board">
-    <Dialog
+    <!-- <Dialog
       v-if="currentPlayer.user?.id === socketId && state === 'awaitingSwap'"
     >
       <template v-slot:header> Swap all tiles? </template>
@@ -22,18 +22,19 @@
           Resume
         </button>
       </template>
-    </Dialog>
+    </Dialog> -->
     <!-- left div -->
     <div class="hc-stats-container">
       <div
         class="hc-scorepanel hc-border-animated"
-        :class="{ active: currentPlayer.user?.id === player.user.id }"
+        :class="{ active: currentPlayer.user?.id === player.user.id && player.user.id === socketId }"
         v-for="player in players"
         :key="player.user.id"
       >
         <div class="hc-playername">
           {{ player.user.name }}
           <span v-if="socketId === player.user.id" class="hc-tag">You</span>
+          <span v-if="!player.user.connected" class="hc-tag">Disconnected</span>
         </div>
         <div
           v-for="score in player.score.values"
@@ -73,6 +74,33 @@
         They have no tile with their lowest color(s) and therefore have the
         choice to return their current tiles and drawing completely new ones.
       </div>
+      <div
+        class="hc-snackbar dark top"
+        :class="{
+          show: state === 'awaitingSwap' && currentPlayer.user?.id === socketId,
+          hide: state !== 'awaitingSwap' || currentPlayer.user?.id !== socketId,
+        }"
+      >
+        <h4 class="hc-nova">Swap all tiles?</h4>
+        You have no tiles with the color of your lowest scoring color. Do you
+        want to return all of your current tiles and draw new ones?
+
+        <div>
+          <button
+            class="hc-btn hc-btn-outline hc-nova hc-emphasized"
+            @click="submitSwapDecision(true)"
+          >
+            Swap all tiles
+          </button>
+          <button
+            class="hc-btn hc-btn-outline hc-nova"
+            @click="submitSwapDecision(false)"
+          >
+            Resume
+          </button>
+        </div>
+      </div>
+
       <svg :viewBox="mapViewBox" @contextmenu="rotateSelectedTile">
         <defs>
           <g id="pod">
@@ -113,7 +141,7 @@
             :pointer-events="calcActive() ? 'visiblePainted' : 'none'"
             :viewBox="tileViewBox"
             :transform="selectedTileRotation(tile)"
-            @click="selectedTile = tile"
+            @click="selectedTile = tile; selectedTileDirection = 0"
           >
             <g class="hc-cell">
               <use
@@ -143,13 +171,9 @@
 
 <script>
 import { Hex, Layout, Point } from '@/hex';
-import Dialog from '@/components/Dialog.vue';
 
 export default {
   name: 'Board',
-  components: {
-    Dialog,
-  },
   props: {
     state: {
       type: String,
@@ -263,7 +287,7 @@ export default {
       );
     },
     rotateSelectedTile(event) {
-      this.selectedTileDirection = (this.selectedTileDirection + 1) % 6;
+      this.selectedTileDirection = (this.selectedTileDirection + 5) % 6;
       if (event.type === 'contextmenu') {
         const cell = document.elementFromPoint(event.clientX, event.clientY);
         cell.dispatchEvent(new Event('mouseover'));
@@ -312,6 +336,7 @@ export default {
       const secondHex = firstHex.neighbor(this.selectedTileDirection);
       const secondCell = this.hexToCell(secondHex);
       this.$emit('make-move', { firstCell, secondCell });
+      this.selectedTileDirection = 0;
     },
     submitSwapDecision(swap) {
       this.$emit('swap', swap);
@@ -334,8 +359,7 @@ export default {
 }
 
 .hc-stats-container {
-  min-width: 21rem;
-  width: 20%;
+  width: 21rem;
   padding: 1rem;
   overflow: scroll;
   background-color: $current-line;
@@ -345,20 +369,30 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-grow: 1;
   position: relative;
-  width: 70%;
+}
+
+.hc-snackbar.dark {
+  background-color: $background;
+  color: $foreground;
+  text-align: left;
 }
 
 .hc-snackbar {
   background-color: $orange;
   color: $background;
+
+  & > div {
+    margin-top: 1rem;
+  }
 }
 
 .hc-tile-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 20%;
+  width: 12rem;
   min-width: 6rem;
   opacity: 0.5;
   padding: 1rem;
@@ -570,7 +604,7 @@ export default {
 
   &.active::before {
     animation: rotate 5s linear infinite;
-    background-color: $comment;
+    background-color: $green;
     opacity: 1;
   }
 }
