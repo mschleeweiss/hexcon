@@ -34,7 +34,7 @@
         <div class="hc-playername">
           {{ player.user.name }}
           <span v-if="socketId === player.user.id" class="hc-tag">You</span>
-          <span v-if="!player.user.connected" class="hc-tag">Disconnected</span>
+          <span v-if="!player.user.connected" class="hc-tag error">Disconnected</span>
         </div>
         <div
           v-for="score in player.score.values"
@@ -360,8 +360,9 @@ export default {
 
 .hc-stats-container {
   width: 21rem;
+  min-width: 21rem;
   padding: 1rem;
-  overflow: scroll;
+  overflow: auto;
   background-color: $current-line;
 }
 
@@ -392,8 +393,9 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 12rem;
-  min-width: 6rem;
+  justify-content: center;
+  width: 10rem;
+  min-width: 10rem;
   opacity: 0.5;
   padding: 1rem;
   background-color: $current-line;

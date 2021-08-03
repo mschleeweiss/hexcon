@@ -32,49 +32,64 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const oldId = client.handshake.query.id as string;
     const name = client.handshake.query.name as string;
 
-    let player = this.users.get(oldId);
-    if (player) {
-      player.id = client.id;
+    let user = this.users.get(oldId);
+    if (user) {
+      user.id = client.id;
+      user.connected = true;
       this.users.delete(oldId);
     } else {
-      player = new User(client.id, name);
+      user = new User(client.id, name);
     }
-    this.users.set(client.id, player);
+    this.users.set(client.id, user);
 
     client.emit('clientConnected', client.id);
     this.logger.log(`${client.id} connected (previously ${oldId})`);
   }
 
   handleDisconnect(client: Socket) {
+    const user = this.users.get(client.id);
+    user.connected = false;
+    this.games.forEach((game: GameController, id: string) => {
+      if (game.containsUser(user)) {
+        game.removeUser(user);
+
+        const event = 'gameStateChanged';
+        this.server.to(id).emit(event, game.getEmittableState());
+      }
+    })
     this.logger.log(`${client.id} disconnected: `);
   }
 
   @SubscribeMessage(SocketEvents.CHANGE_NAME)
   handleChangeName(socket: Socket, payload: any): void {
-    const player = this.users.get(socket.id);
-    if (!player) {
+    const user = this.users.get(socket.id);
+    if (!user) {
       throw new WsException('player_not_found');
     }
 
-    player.name = payload.name;
+    if (payload.name.length > 20) {
+      throw new WsException('name_too_long');
+    }
+
+    user.name = payload.name;
 
     this.games.forEach((game: GameController, id: string) => {
-      if (game.containsUser(player)) {
+      if (game.containsUser(user)) {
         const event = 'gameStateChanged';
         this.server.to(id).emit(event, game.getEmittableState());
       }
-    })
+    });
   }
 
   @SubscribeMessage(SocketEvents.CREATE_GAME)
   handleCreateGame(client: Socket, payload: any): WsResponse<unknown> {
-    const player = this.users.get(client.id);
+    const user = this.users.get(client.id);
 
-    if (!player) {
+    if (!user) {
       throw new WsException('player_not_found');
     }
 
-    const game = new GameController(player);
+    const game = new GameController(user);
     this.games.set(game.id, game);
     const event = SocketEvents.GAME_CREATED;
     return { event, data: game.id };
@@ -93,7 +108,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     try {
-      game.addPlayer(user);
+      game.addUser(user);
     } catch (e) {
       throw new WsException(e.message);
     }

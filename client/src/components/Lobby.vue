@@ -39,6 +39,7 @@
                 @keyup.enter="saveUsername"
                 class="hc-input"
                 ref="username"
+                maxlength="20"
               />
               <button
                 v-if="socketId === player.user.id && editUsername"
@@ -229,7 +230,7 @@ export default {
     padding: 0.125rem;
     margin: 0.25rem;
     font-size: 0.75rem;
-    color: lighten($comment, 10%);
+    color: $foreground;
   }
 }
 

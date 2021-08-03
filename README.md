@@ -11,13 +11,13 @@ Todos:
 * [x] settings (change username)
 * [ ] split playername and username?
 * [ ] about page
-* [ ] mini icons in lobby weiß
-* [ ] drehung mit/gegen uhrzeigersinn
-* [ ] current turn grün? nur animiert wenn man selbst dran ist?
-* [ ] scroll auto playerlist?
+* [x] mini icons in lobby weiß
+* [x] drehung mit/gegen uhrzeigersinn
+* [x] current turn grün? nur animiert wenn man selbst dran ist?
+* [x] scroll auto playerlist?
 * [x] reset rotation?
 * [ ] instant restart
 * [ ] visu latest move
 * [ ] game log right?
 * [ ] minimize score
-* [ ] visu disconnected players
+* [x] visu disconnected players

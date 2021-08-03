@@ -47,9 +47,12 @@ export class GameController implements IEmittable {
         };
     }
 
-    addPlayer(user: User): void {
-        const playerAlreadyExists = this._players.some((player: Player) => player.user.equals(user))
-        if (!playerAlreadyExists) {
+    containsUser(user: User): boolean {
+        return this._players.some((player: Player) => player.user.equals(user))
+    }
+
+    addUser(user: User): void {
+        if (!this.containsUser(user)) {
 
             if (this._players.length === GameController.MAX_PLAYERS) {
                 throw new Error('room_full');
@@ -60,11 +63,29 @@ export class GameController implements IEmittable {
             }
 
             this._players.push(new Player(user));
+
+            if (this._players.length === 1) {
+                this._admin = user;
+            }
+
             this.updateGameStartable();
         }
     }
 
-    changeReadiness(user: User) {
+    removeUser(user: User): void {
+        if (this.containsUser(user)) {
+            if ([GameState.LOBBY, GameState.STARTABLE].includes(this._state)) {
+                const idx = this._players.findIndex((player: Player) => player.user.equals(user));
+                this._players.splice(idx, 1);
+
+                if (this._admin.equals(user) && this._players.length >= 1) {
+                    this._admin = this._players[0].user;
+                }
+            }
+        }
+    }
+
+    changeReadiness(user: User): void {
         if (![GameState.LOBBY, GameState.STARTABLE].includes(this._state)) {
             return;
         }
@@ -167,10 +188,6 @@ export class GameController implements IEmittable {
         }
         this.determineCurrentPlayer();
         this._state = GameState.AWAITING_MOVE;
-    }
-
-    containsUser(user: User): boolean {
-        return this._players.some((player: Player) => player.user.equals(user))
     }
 
     private updateGameStartable(): void {
@@ -281,7 +298,7 @@ export class GameController implements IEmittable {
 
     private transpose(array: Array<Array<any>>): Array<Array<any>> {
         return array.reduce((r, a) => a.map((v, i) => [...(r[i] || []), v]), []);
-    } 
+    }
 
     private findMaxIdx(array: number[], excludeIdx: number[]) {
         let maxIdx = -1;
