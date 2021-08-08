@@ -6,6 +6,7 @@ import { Pouch } from "src/entities/pouch";
 import { IEmittable } from "src/interface/emittable.interface";
 import { Player } from "src/entities/player";
 import { Move } from "src/entities/move";
+import { Log } from "src/entities/log";
 
 export class GameController implements IEmittable {
 
@@ -20,6 +21,7 @@ export class GameController implements IEmittable {
     private _currentPlayer: Player;
     private _winner: Player;
     private _moves: Move[] = [];
+    private _log: Log = new Log();
     private _state: GameState = GameState.LOBBY;
 
     constructor(admin: User) {
@@ -43,7 +45,8 @@ export class GameController implements IEmittable {
             currentPlayer: this._currentPlayer?.getEmittableState(),
             board: this._board?.getEmittableState(),
             state: this._state,
-            winner: this._winner
+            winner: this._winner,
+            log: this._log,
         };
     }
 
@@ -149,6 +152,8 @@ export class GameController implements IEmittable {
             this._currentPlayer.score.incrementScore(color, value);
         });
 
+        this._log.logScore(this._currentPlayer, scoreMap);
+
         if (this.determineWinner()) {
             this._state = GameState.OVER;
             return;
@@ -158,11 +163,13 @@ export class GameController implements IEmittable {
         const hasPlayerExtraMove = fullPointsCountBeforeApplyingMove !== fullPointsCountAfterApplyingMove;
 
         if (hasPlayerExtraMove) {
+            this._log.logExtraTurn(this._currentPlayer);
             return;
         }
 
         if (this.canCurrentPlayerSwap()) {
             this._state = GameState.AWAITING_SWAP;
+            this._log.logSwap(this._currentPlayer);
             return;
         }
 
@@ -186,6 +193,8 @@ export class GameController implements IEmittable {
         if (shouldSwap) {
             this._pouch.giveBackTiles(returnedTiles)
         }
+
+        this._log.logSwapDecision(this._currentPlayer, shouldSwap);
         this.determineCurrentPlayer();
         this._state = GameState.AWAITING_MOVE;
     }

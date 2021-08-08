@@ -15,6 +15,7 @@
       v-if="showBoard"
       :state="game?.state"
       :map="map"
+      :messages="messages"
       :players="players"
       :currentPlayer="game?.currentPlayer"
       :playerTiles="playerTiles"
@@ -77,6 +78,9 @@ export default {
     },
     map() {
       return this.game?.board?.map ?? [];
+    },
+    messages() {
+      return this.game?.log?.messages ?? [];
     },
     showLobby() {
       return (

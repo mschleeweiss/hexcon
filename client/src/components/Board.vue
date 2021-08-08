@@ -1,66 +1,56 @@
 <template>
   <div class="hc-board">
-    <!-- <Dialog
-      v-if="currentPlayer.user?.id === socketId && state === 'awaitingSwap'"
-    >
-      <template v-slot:header> Swap all tiles? </template>
-      <template v-slot:body>
-        You have no tiles with the color of your lowest scoring color.<br /><br />Do
-        you want to return all of your current tiles and draw new ones?
-      </template>
-      <template v-slot:footer>
-        <button
-          class="hc-btn hc-btn-outline hc-nova hc-emphasized"
-          @click="submitSwapDecision(true)"
-        >
-          Swap all tiles
-        </button>
-        <button
-          class="hc-btn hc-btn-outline hc-nova"
-          @click="submitSwapDecision(false)"
-        >
-          Resume
-        </button>
-      </template>
-    </Dialog> -->
-    <!-- left div -->
-    <div class="hc-stats-container">
-      <div
-        class="hc-scorepanel hc-border-animated"
-        :class="{ active: currentPlayer.user?.id === player.user.id && player.user.id === socketId }"
-        v-for="player in players"
-        :key="player.user.id"
-      >
-        <div class="hc-playername">
-          {{ player.user.name }}
-          <span v-if="socketId === player.user.id" class="hc-tag">You</span>
-          <span v-if="!player.user.connected" class="hc-tag error">Disconnected</span>
-        </div>
+    <div class="hc-container-left">
+      <div class="hc-stats-container">
         <div
-          v-for="score in player.score.values"
-          :key="score.type"
-          class="hc-scorebar"
+          class="hc-scorepanel hc-border-animated"
+          :class="{
+            active:
+              currentPlayer.user?.id === player.user.id &&
+              player.user.id === socketId,
+          }"
+          v-for="player in players"
+          :key="player.user.id"
         >
+          <div class="hc-playername">
+            {{ player.user.name }}
+            <span v-if="socketId === player.user.id" class="hc-tag">You</span>
+            <span v-if="!player.user.connected" class="hc-tag error"
+              >Disconnected</span
+            >
+          </div>
           <div
-            class="hc-score-id hc-scorepoint"
-            :class="calcColor(score.type)"
-            style="--point: 18"
-          />
-          <div
-            v-for="point in scorePoints"
-            :key="point"
-            class="hc-scorepoint"
-            :class="[calcColor(score.type), { active: point <= score.value }]"
-            :style="`--point:${point}`"
-          />
-          <span>
-            {{ score.value }}
-          </span>
+            v-for="score in player.score.values"
+            :key="score.type"
+            class="hc-scorebar"
+          >
+            <div
+              class="hc-score-id hc-scorepoint"
+              :class="calcColor(score.type)"
+              style="--point: 18"
+            />
+            <div
+              v-for="point in scorePoints"
+              :key="point"
+              class="hc-scorepoint"
+              :class="[calcColor(score.type), { active: point <= score.value }]"
+              :style="`--point:${point}`"
+            />
+            <span>
+              {{ score.value }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="hc-gamelog-container">
+        <div class="hc-gamelog hc-panel">
+          <span class="hc-label">History</span>
+          <div v-html="messages" />
         </div>
       </div>
     </div>
     <!-- center div -->
-    <div class="hc-map-container">
+    <div class="hc-container-center">
       <div
         class="hc-snackbar top"
         :class="{
@@ -120,15 +110,15 @@
             :key="cell"
             xlink:href="#pod"
             :transform="calcTransformation(cell.coords)"
-            @mouseover="visualizeTile(cell)"
+            @mouseover="visualizeMove(cell)"
             @click="makeMove($event, cell)"
           />
         </g>
       </svg>
     </div>
     <!-- right div -->
-    <div class="hc-tile-container" :class="{ active: calcActive() }">
-      <div class="hc-playertiles hc-border">
+    <div class="hc-container-right" :class="{ active: calcActive() }">
+      <div class="hc-playertiles hc-panel">
         <span class="hc-label">Your Tiles</span>
         <div
           v-for="tile in playerTiles"
@@ -141,7 +131,10 @@
             :pointer-events="calcActive() ? 'visiblePainted' : 'none'"
             :viewBox="tileViewBox"
             :transform="selectedTileRotation(tile)"
-            @click="selectedTile = tile; selectedTileDirection = 0"
+            @click="
+              selectedTile = tile;
+              selectedTileDirection = 0;
+            "
           >
             <g class="hc-cell">
               <use
@@ -186,6 +179,11 @@ export default {
       default: () => [],
     },
     players: {
+      type: Array,
+      required: true,
+      default: () => [],
+    },
+    messages: {
       type: Array,
       required: true,
       default: () => [],
@@ -300,7 +298,7 @@ export default {
       }
       return '';
     },
-    visualizeTile(firstCell) {
+    visualizeMove(firstCell) {
       if (!this.selectedTile) {
         return;
       }
@@ -358,20 +356,49 @@ export default {
   display: flex;
 }
 
-.hc-stats-container {
+.hc-flex-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.vertical {
+    flex-direction: column;
+  }
+}
+
+.hc-container-left {
   width: 21rem;
   min-width: 21rem;
-  padding: 1rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   overflow: auto;
   background-color: $current-line;
 }
 
-.hc-map-container {
+.hc-stats-container {
+  padding: 1rem;
+  overflow: auto;
+}
+
+.hc-gamelog-container {
+  padding: 1rem;
+  height: 10rem;
+}
+.hc-gamelog {
+  font-size: 0.6rem;
+  height: 100%;
+}
+
+.hc-container-center {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-grow: 1;
   position: relative;
+  height: 100%;
+  overflow: auto;
+  flex-grow: 1;
 }
 
 .hc-snackbar.dark {
@@ -389,36 +416,39 @@ export default {
   }
 }
 
-.hc-tile-container {
+.hc-container-right {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 10rem;
   min-width: 10rem;
-  opacity: 0.5;
+  height: 100%;
   padding: 1rem;
   background-color: $current-line;
+  opacity: 0.5;
+  overflow: auto;
   transition: all 0.5s ease;
 }
 
-.hc-tile-container.active {
+.hc-container-right.active {
   opacity: 1;
 }
 
-.hc-tile-container svg {
+.hc-container-right svg {
   height: 3rem;
   cursor: pointer;
 }
 
 .hc-playertiles {
   background-color: $background;
-  padding-bottom: 0rem;
+  padding: 1rem 0rem 0rem 0rem;
 
   & > div {
     position: relative;
     padding: 0rem 1rem;
-    transition: all 0.3s ease-in;
+    text-align: center;
+    transition: all 0.3s ease-out;
 
     &:last-child:not(.selected) {
       padding-bottom: 1rem;
@@ -452,7 +482,7 @@ export default {
   }
 }
 
-.hc-map-container svg {
+.hc-container-center svg {
   height: 100%;
 }
 
@@ -565,6 +595,19 @@ export default {
 
   &.hc-playertiles {
     padding-bottom: 0rem;
+  }
+}
+
+.hc-panel {
+  position: relative;
+  width: 100%;
+  background-color: $background;
+  border: 2px solid $comment;
+  border-radius: 6px;
+  padding: 1rem;
+
+  &.hc-playertiles {
+    padding: 1rem 0rem 0rem 0rem;
   }
 }
 
