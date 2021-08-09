@@ -95,6 +95,7 @@
         <defs>
           <g id="pod">
             <polygon :points="hexPoints" />
+            <!-- <text fill="black" stroke="none" font-size="2rem" text-anchor="middle">+1</text> -->
           </g>
         </defs>
         <g class="hc-cell">
