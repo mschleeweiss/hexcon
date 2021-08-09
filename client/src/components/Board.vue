@@ -15,6 +15,7 @@
           <div class="hc-playername">
             {{ player.user.name }}
             <span v-if="socketId === player.user.id" class="hc-tag">You</span>
+            <span v-if="currentPlayer.user?.id === player.user.id" class="hc-tag success">Current</span>
             <span v-if="!player.user.connected" class="hc-tag error"
               >Disconnected</span
             >

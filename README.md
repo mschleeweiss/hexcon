@@ -5,7 +5,7 @@ Todos:
 * [x] visu player tiles
 * [x] visu selected tile
 * [x] visu when opponent has choice to swap
-* [ ] add some kind of game log (players joined, points made, swap choice, winner)
+* [x] add some kind of game log (players joined, points made, swap choice, winner)
 * [ ] check session handling
 * [ ] write short rule page
 * [x] settings (change username)
@@ -18,6 +18,11 @@ Todos:
 * [x] reset rotation?
 * [ ] instant restart
 * [ ] visu latest move
-* [ ] game log right?
+* [ ] visu extra turn
+* [x] game log right?
+* [ ] current player
+* [ ] visualize latest points 
+* [ ] scroll history to bottom after reload
+* [ ] error after swap (double click?)
 * [ ] minimize score
 * [x] visu disconnected players

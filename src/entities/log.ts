@@ -43,7 +43,7 @@ export class Log implements IEmittable {
 
     logSwapDecision(player: Player, decision: boolean): void {
         const name = player.user.name;
-        const message = `<strong>${name}</strong> has decided <strong>${ decision ? 'not ': '' }to swap their tiles</strong>.`;
+        const message = `<strong>${name}</strong> has decided <strong>${ !decision ? 'not ': '' }to swap their tiles</strong>.`;
         this.log(message);
 
     }
