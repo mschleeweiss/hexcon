@@ -1,10 +1,11 @@
 import { type } from "os";
 import { TileType } from "src/constants/tiletype";
+import { IEmittable } from "src/interface/emittable.interface";
 import { Hex } from "./hex";
 import { Tile } from "./tile";
 import { User } from "./user";
 
-export class Move {
+export class Move implements IEmittable {
     private _user: User;
     private _cells: [Hex, Hex] = [null, null];
     private _types: [TileType, TileType] = [null, null];
@@ -21,6 +22,14 @@ export class Move {
         });
 
         this._tile = new Tile(...this._types);
+    }
+
+    getEmittableState(): Object {
+        return {
+            user: this._user,
+            cells: this._cells,
+            tile: this._tile,
+        }
     }
 
     get user(): User {

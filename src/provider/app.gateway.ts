@@ -193,7 +193,6 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       game.makeMove(move);
     } catch (e) {
-      console.log(e);
       return { success: false, msg: e.message };
     }
 

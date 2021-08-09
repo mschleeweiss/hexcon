@@ -47,6 +47,7 @@ export class GameController implements IEmittable {
             state: this._state,
             winner: this._winner,
             log: this._log.getEmittableState(),
+            moves: this._moves.map((move: Move) => move.getEmittableState()),
         };
     }
 
