@@ -46,7 +46,7 @@ export class GameController implements IEmittable {
             board: this._board?.getEmittableState(),
             state: this._state,
             winner: this._winner,
-            log: this._log,
+            log: this._log.getEmittableState(),
         };
     }
 

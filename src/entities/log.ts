@@ -1,13 +1,15 @@
 import { TileType } from "src/constants/tiletype";
+import { IEmittable } from "src/interface/emittable.interface";
 import { Player } from "./player";
 
-export class Log {
+export class Log implements IEmittable {
 
-    messages: string[] = [];
+    private _messages: string[] = [];
 
-    logTest(): void {
-        console.log("test");
-        this.messages.push("test");
+    getEmittableState(): Object {
+        return {
+            message: this._messages.join('')
+        };
     }
 
     logScore(player: Player, score: Map<TileType, number>): void {
@@ -24,25 +26,33 @@ export class Log {
         const name = player.user.name;
 
         const message = `<strong>${name}</strong> scored <strong>${scoreText}</strong>.`
-        this.messages.push(message);
+        this.log(message);
     }
 
     logExtraTurn(player: Player): void {
         const name = player.user.name;
         const message = `<strong>${name}</strong> just gained an <strong>extra turn</strong>.`;
-        this.messages.push(message);
+        this.log(message);
     }
 
     logSwap(player: Player): void {
         const name = player.user.name;
         const message = `<strong>${name}</strong> has the choice to swap all their tiles.`;
-        this.messages.push(message);
+        this.log(message);
     }
 
     logSwapDecision(player: Player, decision: boolean): void {
         const name = player.user.name;
         const message = `<strong>${name}</strong> has decided <strong>${ decision ? 'not ': '' }to swap their tiles</strong>.`;
-        this.messages.push(message);
+        this.log(message);
 
+    }
+
+    private log(message: string) {
+        if (this._messages.length > 0) {
+            this._messages.push('<br>');
+        }
+
+        this._messages.push(message);
     }
 }

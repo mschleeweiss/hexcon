@@ -45,7 +45,7 @@
       <div class="hc-gamelog-container">
         <div class="hc-gamelog hc-panel">
           <span class="hc-label">History</span>
-          <div v-html="messages" />
+          <div class="hc-messages" ref="messages" v-html="message" />
         </div>
       </div>
     </div>
@@ -183,10 +183,10 @@ export default {
       required: true,
       default: () => [],
     },
-    messages: {
-      type: Array,
+    message: {
+      type: String,
       required: true,
-      default: () => [],
+      default: '-',
     },
     currentPlayer: {
       type: Object,
@@ -202,6 +202,15 @@ export default {
   watch: {
     playerTiles() {
       this.selectedTile = undefined;
+    },
+    message() {
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.$refs.messages.lastElementChild?.scrollIntoView({
+            behavior: 'smooth',
+          });
+        });
+      });
     },
   },
   data() {
@@ -389,6 +398,30 @@ export default {
 .hc-gamelog {
   font-size: 0.6rem;
   height: 100%;
+
+  & > div {
+    height: 6rem;
+    overflow: auto;
+  }
+
+  & ::v-deep .red {
+    color: $red;
+  }
+  & ::v-deep .green {
+    color: $green;
+  }
+  & ::v-deep .yellow {
+    color: $yellow;
+  }
+  & ::v-deep .purple {
+    color: $purple;
+  }
+  & ::v-deep .orange {
+    color: $orange;
+  }
+  & ::v-deep .blue {
+    color: $cyan;
+  }
 }
 
 .hc-container-center {
