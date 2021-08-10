@@ -264,8 +264,7 @@ export class GameController implements IEmittable {
 
             return aScore
                 .map((score, i) => bScore[i] - score)
-                .filter(Boolean)
-                .shift();
+                .filter(Boolean)[0];
         });
 
         this._winner = this._rankedPlayers[0];
@@ -286,24 +285,6 @@ export class GameController implements IEmittable {
 
     private sortedScore(player: Player) {
         return player.score.values.map(v => v.value).sort((a, b) => a - b);
-    }
-
-    private transpose(array: Array<Array<any>>): Array<Array<any>> {
-        return array.reduce((r, a) => a.map((v, i) => [...(r[i] || []), v]), []);
-    }
-
-    private findMaxIdx(array: number[], excludeIdx: number[]) {
-        let maxIdx = -1;
-        let max = -Infinity;
-        for (let i = 0; i < array.length; ++i) {
-            if (!excludeIdx.includes(i)) {
-                if (array[i] > max) {
-                    max = array[i];
-                    maxIdx = i;
-                }
-            }
-        }
-        return maxIdx;
     }
 }
 

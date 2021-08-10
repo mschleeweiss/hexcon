@@ -57,6 +57,22 @@
     <!-- center div -->
     <div class="hc-container-center">
       <div
+        class="hc-snackbar top success"
+        :class="{
+          show: showExtraTurnSnackBar,
+          hide: !showExtraTurnSnackBar,
+        }"
+      >
+        <h4 class="hc-nova">
+          {{
+            currentPlayer.user?.id === socketId
+              ? 'You have'
+              : `${currentPlayer.user?.name} has`
+          }}
+          gained an extra turn
+        </h4>
+      </div>
+      <div
         class="hc-snackbar top"
         :class="{
           show: state === 'awaitingSwap' && currentPlayer.user?.id !== socketId,
@@ -97,33 +113,40 @@
       </div>
 
       <svg :viewBox="mapViewBox" @contextmenu="rotateSelectedTile">
-        <defs>
-          <g id="pod">
-            <polygon :points="hexPoints" />
-            <!-- <text fill="black" stroke="none" font-size="2rem" text-anchor="middle">+1</text> -->
-          </g>
-        </defs>
-        <g class="hc-cell">
-          <use
+        <g
+          class="hc-cell"
+          v-for="cell in map"
+          :key="cell"
+          :transform="calcTransformation(cell.coords)"
+        >
+          <polygon
+            :data-coords="cell"
             :class="[
               calcColor(cell.type),
               {
-                active: (cell.type === 0 || cell.temp) && calcActive(),
+                active: (cell.type === 0 || cell.temp) && isActive(),
                 temp: cell.temp,
+                latest: isLatest(cell),
               },
             ]"
-            v-for="cell in map"
-            :key="cell"
-            xlink:href="#pod"
-            :transform="calcTransformation(cell.coords)"
+            :points="hexPoints"
             @mouseover="visualizeMove(cell)"
             @click="makeMove($event, cell)"
           />
+          <text
+            v-if="cell.gains > 0"
+            fill="black"
+            stroke="none"
+            font-size="3rem"
+            text-anchor="end"
+          >
+            +{{ cell.gains }}
+          </text>
         </g>
       </svg>
     </div>
     <!-- right div -->
-    <div class="hc-container-right" :class="{ active: calcActive() }">
+    <div class="hc-container-right" :class="{ active: isActive() }">
       <div class="hc-playertiles hc-panel">
         <span class="hc-label">Your Tiles</span>
         <div
@@ -134,7 +157,7 @@
         >
           <svg
             class="hc-tile"
-            :pointer-events="calcActive() ? 'visiblePainted' : 'none'"
+            :pointer-events="isActive() ? 'visiblePainted' : 'none'"
             :viewBox="tileViewBox"
             :transform="selectedTileRotation(tile)"
             @click="
@@ -143,14 +166,14 @@
             "
           >
             <g class="hc-cell">
-              <use
+              <polygon
                 :class="calcColor(tile.first)"
-                xlink:href="#pod"
+                :points="hexPoints"
                 :transform="calcTransformation(defaultFirst)"
               />
-              <use
+              <polygon
                 :class="calcColor(tile.second)"
-                xlink:href="#pod"
+                :points="hexPoints"
                 :transform="calcTransformation(defaultSecond)"
               />
             </g>
@@ -184,6 +207,11 @@ export default {
       required: true,
       default: () => [],
     },
+    moves: {
+      type: Array,
+      required: true,
+      default: () => [],
+    },
     players: {
       type: Array,
       required: true,
@@ -212,6 +240,14 @@ export default {
     message() {
       this.scrollHistoryToBottom();
     },
+    moves() {
+      const latestMove = this.moves[this.moves.length - 1];
+
+      if (latestMove.user.id === this.currentPlayer.user.id) {
+        this.showExtraTurnSnackBar = true;
+        window.setTimeout(() => (this.showExtraTurnSnackBar = false), 4000);
+      }
+    },
   },
   data() {
     return {
@@ -227,6 +263,7 @@ export default {
       defaultSecond: { q: 1, r: 0, s: -1 },
       selectedTile: undefined,
       selectedTileDirection: 0,
+      showExtraTurnSnackBar: false,
     };
   },
   computed: {
@@ -270,12 +307,6 @@ export default {
     },
   },
   methods: {
-    calcActive() {
-      return (
-        this.currentPlayer.user?.id === this.socketId &&
-        this.state === 'awaitingMove'
-      );
-    },
     calcColor(id) {
       return this.colorKeys[id];
     },
@@ -291,6 +322,20 @@ export default {
       return this.map.find(
         (o) =>
           o.coords.q === hex.q && o.coords.r === hex.r && o.coords.s === hex.s,
+      );
+    },
+    isActive() {
+      return (
+        this.currentPlayer.user?.id === this.socketId &&
+        this.state === 'awaitingMove'
+      );
+    },
+    isLatest(cell) {
+      return this.moves[this.moves.length - 1]?.cells.some(
+        (c) =>
+          c.q === cell.coords.q &&
+          c.r === cell.coords.r &&
+          c.s === cell.coords.s,
       );
     },
     rotateSelectedTile(event) {
@@ -321,12 +366,13 @@ export default {
         return;
       }
 
-      this.map
-        .filter((cell) => cell.temp)
-        .forEach((cell) => {
+      this.map.forEach((cell) => {
+        if (cell.temp) {
           cell.type = 0;
           delete cell.temp;
-        });
+        }
+        cell.gains = 0;
+      });
 
       const firstHex = this.cellToHex(firstCell);
       const secondHex = firstHex.neighbor(this.selectedTileDirection);
@@ -337,6 +383,20 @@ export default {
         firstCell.type = this.selectedTile.first;
         secondCell.temp = true;
         secondCell.type = this.selectedTile.second;
+
+        for (let i = 0; i < Hex.directions.length; ++i) {
+          let curr = this.hexToCell(firstHex.neighbor(i));
+          while (curr && curr.type === firstCell.type && !curr.temp) {
+            curr.gains = (curr.gains ?? 0) + 1;
+            curr = this.hexToCell(this.cellToHex(curr).neighbor(i));
+          }
+
+          curr = this.hexToCell(secondHex.neighbor(i));
+          while (curr && curr.type === secondCell.type && !curr.temp) {
+            curr.gains = (curr.gains ?? 0) + 1;
+            curr = this.hexToCell(this.cellToHex(curr).neighbor(i));
+          }
+        }
       }
     },
     makeMove(event, firstCell) {
@@ -414,22 +474,22 @@ export default {
     overflow: auto;
   }
 
-  & ::v-deep .red {
+  & :deep(.red) {
     color: $red;
   }
-  & ::v-deep .green {
+  & :deep(.green) {
     color: $green;
   }
-  & ::v-deep .yellow {
+  & :deep(.yellow) {
     color: $yellow;
   }
-  & ::v-deep .purple {
+  & :deep(.purple) {
     color: $purple;
   }
-  & ::v-deep .orange {
+  & :deep(.orange) {
     color: $orange;
   }
-  & ::v-deep .blue {
+  & :deep(.blue) {
     color: $cyan;
   }
 }
@@ -444,15 +504,19 @@ export default {
   flex-grow: 1;
 }
 
-.hc-snackbar.dark {
-  background-color: $background;
-  color: $foreground;
-  text-align: left;
-}
-
 .hc-snackbar {
   background-color: $orange;
   color: $background;
+
+  &.dark {
+    background-color: $background;
+    color: $foreground;
+    text-align: left;
+  }
+
+  &.success {
+    background-color: $green;
+  }
 
   & > div {
     margin-top: 1rem;
@@ -509,7 +573,7 @@ export default {
         margin-bottom: 0;
       }
 
-      & .hc-cell use {
+      & .hc-cell polygon {
         stroke: $comment;
       }
     }
@@ -529,7 +593,7 @@ export default {
   height: 100%;
 }
 
-.hc-cell use {
+.hc-cell polygon {
   stroke: $background;
   fill: $current-line;
   stroke-width: 0.5rem;
@@ -558,6 +622,15 @@ export default {
   }
   &.temp {
     opacity: 0.6;
+  }
+  &.latest {
+    animation: blinker 0.2s step-start 5;
+  }
+
+  @keyframes blinker {
+    50% {
+      fill: $current-line;
+    }
   }
 }
 

@@ -15,6 +15,7 @@
       v-if="showBoard"
       :state="game?.state"
       :map="map"
+      :moves="game?.moves"
       :message="message"
       :players="players"
       :currentPlayer="game?.currentPlayer"
