@@ -15,7 +15,11 @@
           <div class="hc-playername">
             {{ player.user.name }}
             <span v-if="socketId === player.user.id" class="hc-tag">You</span>
-            <span v-if="currentPlayer.user?.id === player.user.id" class="hc-tag success">Current</span>
+            <span
+              v-if="currentPlayer.user?.id === player.user.id"
+              class="hc-tag success"
+              >Current</span
+            >
             <span v-if="!player.user.connected" class="hc-tag error"
               >Disconnected</span
             >
@@ -206,13 +210,7 @@ export default {
       this.selectedTile = undefined;
     },
     message() {
-      this.$nextTick(() => {
-        this.$nextTick(() => {
-          this.$refs.messages.lastElementChild?.scrollIntoView({
-            behavior: 'smooth',
-          });
-        });
-      });
+      this.scrollHistoryToBottom();
     },
   },
   data() {
@@ -303,6 +301,15 @@ export default {
         event.preventDefault();
       }
     },
+    scrollHistoryToBottom() {
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.$refs.messages.lastElementChild?.scrollIntoView({
+            behavior: 'smooth',
+          });
+        });
+      });
+    },
     selectedTileRotation(tile) {
       if (tile === this.selectedTile) {
         return `rotate(-${60 * this.selectedTileDirection})`;
@@ -353,6 +360,7 @@ export default {
   },
   mounted() {
     this.$emit('mounted');
+    this.scrollHistoryToBottom();
   },
 };
 </script>

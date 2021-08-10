@@ -20,7 +20,7 @@ Todos:
 * [ ] visu latest move
 * [ ] visu extra turn
 * [x] game log right?
-* [ ] current player
+* [x] current player
 * [ ] visualize latest points 
 * [ ] scroll history to bottom after reload
 * [ ] error after swap (double click?)

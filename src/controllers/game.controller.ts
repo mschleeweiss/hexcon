@@ -16,6 +16,7 @@ export class GameController implements IEmittable {
     private _id: string = this.generateId(4);
     private _admin: User;
     private _players: Player[] = [];
+    private _rankedPlayers: Player[] = [];
     private _board: Board;
     private _pouch: Pouch = new Pouch();
     private _currentPlayer: Player;
@@ -155,8 +156,9 @@ export class GameController implements IEmittable {
 
         this._log.logScore(this._currentPlayer, scoreMap);
 
-        if (this.determineWinner()) {
+        if (this.isGameOver()) {
             this._state = GameState.OVER;
+            this.rankPlayers();
             return;
         }
 
@@ -249,48 +251,24 @@ export class GameController implements IEmittable {
         })
     }
 
-    private determineWinner() {
+    private isGameOver() {
         let winner = this._players.find((p: Player) => p.score.isMaxed());
 
-        if (winner) {
-            this._winner = winner;
-            return true;
-        }
+        return winner || this._board.isFull();
+    }
 
-        if (this._board.isFull()) {
-            const playerValues = this.players
-                .map((p: Player) => p.score.values.map((val) => val.value));
+    private rankPlayers() {
+        this._rankedPlayers = this.players.sort((a: Player, b: Player) => {
+            const aScore = this.sortedScore(a);
+            const bScore = this.sortedScore(b);
 
-            playerValues.forEach((scoreValues) => scoreValues.sort((a, b) => a - b));
+            return aScore
+                .map((score, i) => bScore[i] - score)
+                .filter(Boolean)
+                .shift();
+        });
 
-            const valuePlayers = this.transpose(playerValues);
-            const loserIdxs = [];
-            for (let i = 0; i < valuePlayers.length; ++i) {
-                const values = valuePlayers[i];
-                const maxIdx = this.findMaxIdx(values, loserIdxs);
-                for (let j = 0; j < values.length; ++j) {
-                    if (loserIdxs.includes(j)) {
-                        continue;
-                    }
-                    const value = values[j];
-                    if (value < values[maxIdx]) {
-                        loserIdxs.push(j);
-                    }
-                }
-                if (loserIdxs.length = this.players.length - 1) {
-                    break;
-                }
-            }
-
-            const playerIdxs = [...Array(this._players.length).keys()];
-            const winnerIdxs = playerIdxs.filter(x => !loserIdxs.includes(x));
-            const winnerIdx = winnerIdxs[0];
-
-            this._winner = this._players[winnerIdx];
-            return true;
-        }
-
-        return false;
+        this._winner = this._rankedPlayers[0];
     }
 
 
@@ -304,6 +282,10 @@ export class GameController implements IEmittable {
             );
         }
         return result.join('');
+    }
+
+    private sortedScore(player: Player) {
+        return player.score.values.map(v => v.value).sort((a, b) => a - b);
     }
 
     private transpose(array: Array<Array<any>>): Array<Array<any>> {
