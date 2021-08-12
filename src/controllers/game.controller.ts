@@ -43,6 +43,7 @@ export class GameController implements IEmittable {
             id: this._id,
             admin: this._admin,
             players: this._players.map((player: Player) => player.getEmittableState()),
+            rankedPlayers: this._rankedPlayers.map((player: Player) => player.getEmittableState()),
             currentPlayer: this._currentPlayer?.getEmittableState(),
             board: this._board?.getEmittableState(),
             state: this._state,
@@ -156,9 +157,10 @@ export class GameController implements IEmittable {
 
         this._log.logScore(this._currentPlayer, scoreMap);
 
+        this.rankPlayers();
         if (this.isGameOver()) {
+            this._currentPlayer = undefined;
             this._state = GameState.OVER;
-            this.rankPlayers();
             return;
         }
 

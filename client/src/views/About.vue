@@ -17,5 +17,6 @@
 <style lang="scss" scoped>
 .hc-about {
   padding: 2rem;
+  height: 100%;
 }
 </style>

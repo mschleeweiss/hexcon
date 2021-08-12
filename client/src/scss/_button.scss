@@ -10,34 +10,44 @@
     border: 2px solid $foreground;
     color: $foreground;
     transition: all 0.3s ease;
-}
 
-.hc-btn-outline:disabled {
-    opacity: 0.5;
-    cursor: default;
-}
+    &:disabled {
+        opacity: 0.5;
+        cursor: default;
+    }
 
-.hc-btn-outline:hover:enabled {
-    background-color: $foreground;
-    color: $background;
-}
+    &:hover:enabled {
+        background-color: $foreground;
+        color: $background;
+    }
 
-.hc-btn-outline.hc-emphasized {
-    border: 2px solid $cyan;
-    color: $cyan;
-}
+    &.emphasized {
+        border: 2px solid $cyan;
+        color: $cyan;
 
-.hc-btn-outline.hc-emphasized:hover:enabled {
-    background-color: $cyan;
-    color: $background;
-}
+        &:hover:enabled {
+            background-color: $cyan;
+            color: $background;
+        }
+    }
 
-.hc-btn-outline.hc-success {
-    border: 2px solid $green;
-    color: $green;
-}
+    &.success {
+        border: 2px solid $green;
+        color: $green;
 
-.hc-btn-outline.hc-success:hover:enabled {
-    background-color: $green;
-    color: $background;
+        &:hover:enabled {
+            background-color: $green;
+            color: $background;
+        }
+    }
+
+    &.dark {
+        border: 2px solid $background;
+        color: $background;
+
+        &:hover:enabled {
+            background-color: $background;
+            color: $foreground;
+        }
+    }
 }

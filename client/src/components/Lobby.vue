@@ -65,14 +65,14 @@
 
       <div class="hc-button-area">
         <button
-          class="hc-btn hc-btn-outline hc-nova hc-emphasized"
+          class="hc-btn hc-btn-outline hc-nova emphasized"
           @click="copyLink"
         >
           copy link
         </button>
         <button
           v-if="socketId === adminId"
-          class="hc-btn hc-btn-outline hc-nova hc-success"
+          class="hc-btn hc-btn-outline hc-nova success"
           @click="startGame"
           :disabled="game.state === 'lobby'"
         >

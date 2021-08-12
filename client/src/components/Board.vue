@@ -6,8 +6,8 @@
           class="hc-scorepanel hc-border-animated"
           :class="{
             active:
-              currentPlayer.user?.id === player.user.id &&
-              player.user.id === socketId,
+              currentPlayer?.user?.id === player.user.id &&
+              isClientCurrentPlayer,
           }"
           v-for="player in players"
           :key="player.user.id"
@@ -16,7 +16,7 @@
             {{ player.user.name }}
             <span v-if="socketId === player.user.id" class="hc-tag">You</span>
             <span
-              v-if="currentPlayer.user?.id === player.user.id"
+              v-if="currentPlayer?.user?.id === player.user.id"
               class="hc-tag success"
               >Current</span
             >
@@ -65,9 +65,9 @@
       >
         <h4 class="hc-nova">
           {{
-            currentPlayer.user?.id === socketId
+            isClientCurrentPlayer
               ? 'You have'
-              : `${currentPlayer.user?.name} has`
+              : `${currentPlayer?.user?.name} has`
           }}
           gained an extra turn
         </h4>
@@ -75,12 +75,12 @@
       <div
         class="hc-snackbar top"
         :class="{
-          show: state === 'awaitingSwap' && currentPlayer.user?.id !== socketId,
-          hide: state !== 'awaitingSwap' || currentPlayer.user?.id === socketId,
+          show: state === 'awaitingSwap' && !isClientCurrentPlayer,
+          hide: state !== 'awaitingSwap' || isClientCurrentPlayer,
         }"
       >
         <h4 class="hc-nova">
-          {{ currentPlayer.user?.name }} can swap all tiles
+          {{ currentPlayer?.user?.name }} can swap all tiles
         </h4>
         They have no tile with their lowest color(s) and therefore have the
         choice to return their current tiles and drawing completely new ones.
@@ -88,8 +88,8 @@
       <div
         class="hc-snackbar dark top"
         :class="{
-          show: state === 'awaitingSwap' && currentPlayer.user?.id === socketId,
-          hide: state !== 'awaitingSwap' || currentPlayer.user?.id !== socketId,
+          show: state === 'awaitingSwap' && isClientCurrentPlayer,
+          hide: state !== 'awaitingSwap' || !isClientCurrentPlayer,
         }"
       >
         <h4 class="hc-nova">Swap all tiles?</h4>
@@ -98,7 +98,7 @@
 
         <div>
           <button
-            class="hc-btn hc-btn-outline hc-nova hc-emphasized"
+            class="hc-btn hc-btn-outline hc-nova emphasized"
             @click="submitSwapDecision(true)"
           >
             Swap all tiles
@@ -188,14 +188,26 @@
         </div>
       </div>
     </div>
+    <!-- game over overlay -->
+    <transition name="fade">
+      <game-over
+        v-if="state === 'over'"
+        class="hc-gameover-container"
+        :rankedPlayers="rankedPlayers"
+      />
+    </transition>
   </div>
 </template>
 
 <script>
 import { Hex, Layout, Point } from '@/hex';
+import GameOver from '@/components/GameOver.vue';
 
 export default {
   name: 'Board',
+  components: {
+    GameOver,
+  },
   props: {
     state: {
       type: String,
@@ -213,6 +225,11 @@ export default {
       default: () => [],
     },
     players: {
+      type: Array,
+      required: true,
+      default: () => [],
+    },
+    rankedPlayers: {
       type: Array,
       required: true,
       default: () => [],
@@ -243,7 +260,7 @@ export default {
     moves() {
       const latestMove = this.moves[this.moves.length - 1];
 
-      if (latestMove.user.id === this.currentPlayer.user.id) {
+      if (latestMove.user.id === this.currentPlayer?.user.id) {
         this.showExtraTurnSnackBar = true;
         window.setTimeout(() => (this.showExtraTurnSnackBar = false), 4000);
       }
@@ -305,6 +322,9 @@ export default {
         .fill()
         .map((_, i) => i + 1);
     },
+    isClientCurrentPlayer() {
+      return this.socketId === this.currentPlayer?.user?.id;
+    },
   },
   methods: {
     calcColor(id) {
@@ -325,10 +345,7 @@ export default {
       );
     },
     isActive() {
-      return (
-        this.currentPlayer.user?.id === this.socketId &&
-        this.state === 'awaitingMove'
-      );
+      return this.isClientCurrentPlayer && this.state === 'awaitingMove';
     },
     isLatest(cell) {
       return this.moves[this.moves.length - 1]?.cells.some(
@@ -783,5 +800,22 @@ export default {
 
 .hc-btn {
   margin-left: 0.5rem;
+}
+
+.hc-gameover-container {
+  position: absolute;
+  left: 21rem;
+  width: calc(100% - 21rem);
+  height: 100%;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 1.5s ease 3s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
