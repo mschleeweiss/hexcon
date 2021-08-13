@@ -189,9 +189,8 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
       throw new WsException('game_not_found');
     }
 
-    const move = new Move(user, payload.tile);
     try {
-      game.makeMove(move);
+      game.makeMove(user, payload.tile);
     } catch (e) {
       return { success: false, msg: e.message };
     }

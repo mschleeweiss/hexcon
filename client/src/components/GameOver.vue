@@ -8,13 +8,15 @@
       <div class="hc-ranking">
         <div class="hc-winner">
           <i class="fas fa-trophy"></i>
-          {{ winner.user.name }}
+          <span class="hc-name">{{ winner.user.name }}</span>
+          <span class="hc-info">{{ winner.moveCount }} moves / {{ formatMilliseconds(winner.thinkTimeInMS) }} thinking time</span>
         </div>
         <table class="hc-losers">
           <tr>
             <th style="width: 1rem"></th>
             <th style="text-align: right; width: 1rem">#</th>
             <th style="text-align: left">Name</th>
+            <th style="text-align: right">Moves</th>
             <th style="text-align: right">Time</th>
           </tr>
           <tr v-for="(player, idx) in notWinners" :key="player.user.id">
@@ -23,7 +25,8 @@
             </td>
             <td style="text-align: right">{{ idx + 2 }}</td>
             <td>{{ player.user.name }}</td>
-            <td style="text-align: right"></td>
+            <td style="text-align: right">{{ player.moveCount }}</td>
+            <td style="text-align: right">{{ formatMilliseconds(player.thinkTimeInMS) }}</td>
           </tr>
         </table>
       </div>
@@ -110,6 +113,9 @@ export default {
 
       return mapping[rank] ?? 'white';
     },
+    formatMilliseconds(ms) {
+      return new Date(ms).toISOString().substr(11, 8);
+    }
   },
 };
 </script>
@@ -157,7 +163,7 @@ export default {
   justify-content: center;
   align-items: center;
   background-color: $background;
-  width: 20rem;
+  width: 25rem;
   border-radius: 0.25rem;
   box-shadow: 0 5px 10px 0 rgb(0 0 0 / 25%);
 
@@ -186,7 +192,15 @@ export default {
   background-color: $current-line;
   padding: 1rem 3rem;
   border-radius: 0.25rem 0.25rem 0rem 0rem;
-  font-size: 1.5rem;
+
+  & .hc-name {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  & .hc-info {
+    font-size: 0.6rem;
+  }
 
   & > i {
     color: $gold;

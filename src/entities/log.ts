@@ -45,7 +45,12 @@ export class Log implements IEmittable {
         const name = player.user.name;
         const message = `<strong>${name}</strong> has decided <strong>${ !decision ? 'not ': '' }to swap their tiles</strong>.`;
         this.log(message);
+    }
 
+    logWinner(player: Player) {
+        const name = player.user.name;
+        const message = `<strong>${name} wins the game!</strong> `;
+        this.log(message);
     }
 
     private log(message: string) {

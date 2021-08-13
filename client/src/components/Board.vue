@@ -190,6 +190,11 @@
     </div>
     <!-- game over overlay -->
     <transition name="fade">
+      <!-- <game-over
+        v-if="rankedPlayers.length > 0"
+        class="hc-gameover-container"
+        :rankedPlayers="rankedPlayers"
+      /> -->
       <game-over
         v-if="state === 'over'"
         class="hc-gameover-container"
@@ -260,7 +265,7 @@ export default {
     moves() {
       const latestMove = this.moves[this.moves.length - 1];
 
-      if (latestMove.user.id === this.currentPlayer?.user.id) {
+      if (latestMove.player.user.id === this.currentPlayer?.user.id) {
         this.showExtraTurnSnackBar = true;
         window.setTimeout(() => (this.showExtraTurnSnackBar = false), 4000);
       }

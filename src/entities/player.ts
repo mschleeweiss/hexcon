@@ -5,19 +5,21 @@ import { Tile } from "./tile";
 import { User } from "./user";
 
 
-export class Player implements IEmittable{
+export class Player implements IEmittable {
     private static readonly MAX_TILES = 6;
 
     private _user: User;
     private _tiles: Tile[] = [];
     private _ready: boolean = false;
     private _score: Score = new Score();
+    private _moveCount: number = 0;
+    private _thinkTimeInMS: number = 0;
 
     constructor(user: User) {
         this._user = user;
     }
 
-    get user() : User {
+    get user(): User {
         return this._user;
     }
 
@@ -37,16 +39,26 @@ export class Player implements IEmittable{
         return this._score;
     }
 
+    set moveCount(value: number) {
+        this._moveCount = value;
+    }
+
+    get thinkTime(): number {
+        return this._thinkTimeInMS;
+    }
+
     getEmittableState(): Object {
         return {
             user: this.user,
             ready: this.ready,
             score: this.score.getEmittableState(),
+            moveCount: this._moveCount,
+            thinkTimeInMS: this._thinkTimeInMS,
         };
     }
-    
+
     equals(player: Player): boolean {
-      return player.user.id === this.user.id;
+        return player.user.id === this.user.id;
     }
 
     addTile(tile: Tile) {
@@ -77,5 +89,12 @@ export class Player implements IEmittable{
         this._tiles.length = 0;
         return tiles;
     }
-  }
-  
+
+    resetThinkTime(): void {
+        this._thinkTimeInMS = 0;
+    }
+
+    increaseThinkTime(milliseconds: number): void {
+        this._thinkTimeInMS += milliseconds;
+    }
+}

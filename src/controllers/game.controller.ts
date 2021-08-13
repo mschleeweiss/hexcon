@@ -14,6 +14,7 @@ export class GameController implements IEmittable {
     private static readonly MIN_PLAYERS = 2;
 
     private _id: string = this.generateId(4);
+    private _starttime: Date;
     private _admin: User;
     private _players: Player[] = [];
     private _rankedPlayers: Player[] = [];
@@ -110,19 +111,23 @@ export class GameController implements IEmittable {
             throw new Error('unauthorized');
         }
 
+        this._starttime = new Date();
         this._state = GameState.AWAITING_MOVE;
         this._board = new Board(this._players.length);
         this.drawPlayerTiles();
         this.determineCurrentPlayer();
     }
 
-    makeMove(move: Move) {
+    makeMove(user: User, params: Object) {
+
         if (this._state !== GameState.AWAITING_MOVE) {
             throw new Error('wrong_action');
         }
-        if (this._currentPlayer.user !== move.user) {
+        if (this._currentPlayer.user !== user) {
             throw new Error('unauthorized');
         }
+
+        const move = new Move(this._currentPlayer, params);
 
         if (!this._currentPlayer.hasTile(move.tile)) {
             throw new Error('invalid_move');
@@ -159,6 +164,7 @@ export class GameController implements IEmittable {
 
         this.rankPlayers();
         if (this.isGameOver()) {
+            this._log.logWinner(this._rankedPlayers[0]);
             this._currentPlayer = undefined;
             this._state = GameState.OVER;
             return;
@@ -260,18 +266,53 @@ export class GameController implements IEmittable {
     }
 
     private rankPlayers() {
+        this.calcMoveCountForPlayers();
+        this.calcThinkTimeForPlayers();
+
         this._rankedPlayers = this.players.sort((a: Player, b: Player) => {
             const aScore = this.sortedScore(a);
             const bScore = this.sortedScore(b);
 
-            return aScore
+            // higher score = better => b - a
+            const scoreDiff = aScore
                 .map((score, i) => bScore[i] - score)
-                .filter(Boolean)[0];
-        });
+                .filter(Boolean)[0] ?? 0;
+            if (scoreDiff) {
+                return scoreDiff;
+            }
 
-        this._winner = this._rankedPlayers[0];
+            // lower count = better => a - b
+            const moveDiff = a.moveCount - b.moveCount;
+            if (moveDiff) {
+                return moveDiff;
+            }
+
+            // lower time = better => a - b
+            return a.thinkTime - b.thinkTime;
+        });
     }
 
+    private calcMoveCountForPlayers() {
+        this._players.forEach((player: Player) => {
+            const playerMoves = this._moves.filter((move: Move) => move.player.equals(player));
+            player.moveCount = playerMoves.length;
+        });
+    }
+
+    private calcThinkTimeForPlayers() {
+        this._players.forEach((player: Player) => {
+            player.resetThinkTime()
+        });
+
+        this._moves.forEach((move: Move, i: number, moves: Move[]) => {
+            const currTime = move.timestamp;
+            const previousTime = moves[i - 1]?.timestamp ?? this._starttime;
+
+            const diff = currTime.getTime() - previousTime.getTime();
+
+            move.player.increaseThinkTime(diff);
+        })
+    }
 
     private generateId(length: number): string {
         const result = [];

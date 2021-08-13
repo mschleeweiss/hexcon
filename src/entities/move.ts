@@ -2,17 +2,18 @@ import { type } from "os";
 import { TileType } from "src/constants/tiletype";
 import { IEmittable } from "src/interface/emittable.interface";
 import { Hex } from "./hex";
+import { Player } from "./player";
 import { Tile } from "./tile";
-import { User } from "./user";
 
 export class Move implements IEmittable {
-    private _user: User;
+    private _player: Player;
     private _cells: [Hex, Hex] = [null, null];
     private _types: [TileType, TileType] = [null, null];
     private _tile: Tile;
+    private _timestamp: Date = new Date();
 
-    constructor (user: User, params: Object) {
-        this._user = user;
+    constructor (player: Player, params: Object) {
+        this._player = player;
         Object.keys(params).forEach((key: string, idx: number) => {
             const cell = params[key];
             const coords = cell.coords;
@@ -26,14 +27,14 @@ export class Move implements IEmittable {
 
     getEmittableState(): Object {
         return {
-            user: this._user,
+            player: this._player.getEmittableState(),
             cells: this._cells,
             tile: this._tile,
         }
     }
 
-    get user(): User {
-        return this._user;
+    get player(): Player {
+        return this._player;
     }
 
     get cells(): [Hex, Hex] {
@@ -42,5 +43,9 @@ export class Move implements IEmittable {
 
     get tile(): Tile {
         return this._tile;
+    }
+
+    get timestamp(): Date {
+        return this._timestamp;
     }
 }
