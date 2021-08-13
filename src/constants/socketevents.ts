@@ -10,5 +10,6 @@ export const enum SocketEvents {
     START_GAME = 'startGame',
     SWAP_TILES = 'swapTiles',
     PLACE_TILE = 'placeTile',
+    REMATCH = 'rematch',
   }
   

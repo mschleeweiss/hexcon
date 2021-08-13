@@ -12,8 +12,8 @@
           v-for="player in players"
           :key="player.user.id"
         >
-          <div class="hc-playername">
-            {{ player.user.name }}
+          <div class="hc-playerinfo">
+            <span class="hc-playername">{{ player.user.name }}</span>
             <span v-if="socketId === player.user.id" class="hc-tag">You</span>
             <span
               v-if="currentPlayer?.user?.id === player.user.id"
@@ -199,6 +199,7 @@
         v-if="state === 'over'"
         class="hc-gameover-container"
         :rankedPlayers="rankedPlayers"
+        :showRematch="game?.admin?.id === socketId"
       />
     </transition>
   </div>
@@ -214,40 +215,15 @@ export default {
     GameOver,
   },
   props: {
-    state: {
-      type: String,
+    game: {
+      type: Object,
       required: true,
-      default: '',
-    },
-    map: {
-      type: Array,
-      required: true,
-      default: () => [],
-    },
-    moves: {
-      type: Array,
-      required: true,
-      default: () => [],
-    },
-    players: {
-      type: Array,
-      required: true,
-      default: () => [],
-    },
-    rankedPlayers: {
-      type: Array,
-      required: true,
-      default: () => [],
+      default: () => ({}),
     },
     message: {
       type: String,
       required: true,
       default: '-',
-    },
-    currentPlayer: {
-      type: Object,
-      required: true,
-      default: () => {},
     },
     playerTiles: {
       type: Array,
@@ -264,6 +240,10 @@ export default {
     },
     moves() {
       const latestMove = this.moves[this.moves.length - 1];
+
+      if (!latestMove) {
+        return;
+      }
 
       if (latestMove.player.user.id === this.currentPlayer?.user.id) {
         this.showExtraTurnSnackBar = true;
@@ -316,8 +296,23 @@ export default {
 
       return `${offsetX} ${offsetY} ${sizeX} ${sizeY}`;
     },
+    currentPlayer() {
+      return this.game?.currentPlayer;
+    },
     layout() {
       return new Layout(Layout.pointy, new Point(100, 100), new Point(0, 0));
+    },
+    map() {
+      return this.game?.board?.map ?? [];
+    },
+    moves() {
+      return this.game?.moves ?? [];
+    },
+    players() {
+      return this.game?.players ?? [];
+    },
+    rankedPlayers() {
+      return this.game?.rankedPlayers ?? [];
     },
     socketId() {
       return this.$store.state.socketId;
@@ -326,6 +321,9 @@ export default {
       return Array(18)
         .fill()
         .map((_, i) => i + 1);
+    },
+    state() {
+      return this.game?.state ?? '';
     },
     isClientCurrentPlayer() {
       return this.socketId === this.currentPlayer?.user?.id;
@@ -663,11 +661,15 @@ export default {
   border-radius: 0.25rem;
 }
 
-.hc-playername {
+.hc-playerinfo {
   display: flex;
   align-items: center;
   font-weight: 900;
   margin-bottom: 1rem;
+
+  & > .hc-playername {
+    overflow-wrap: anywhere;
+  }
 }
 
 .hc-tag {
@@ -816,7 +818,7 @@ export default {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 1.5s ease 3s;
+  transition: opacity 1.5s ease 2s;
 }
 
 .fade-enter-from,

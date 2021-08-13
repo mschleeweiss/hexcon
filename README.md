@@ -18,8 +18,8 @@ Todos:
 * [x] current player
 * [x] scroll history to bottom after reload
 * [x] visu disconnected players
-* [ ] visu game over (ladder + timings?)
-* [ ] instant restart after game over
+* [x] visu game over (ladder + timings?)
+* [x] instant restart after game over
 * [ ] write short rule page
 * [ ] error after swap (double click?)
 * [ ] about page

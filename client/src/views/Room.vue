@@ -13,13 +13,8 @@
     <Lobby v-if="showLobby" :game="game" />
     <Board
       v-if="showBoard"
-      :state="game?.state"
-      :map="map"
-      :moves="game?.moves"
+      :game="game"
       :message="message"
-      :players="players"
-      :rankedPlayers="game?.rankedPlayers"
-      :currentPlayer="game?.currentPlayer"
       :playerTiles="playerTiles"
       @mounted="refreshTiles"
       @make-move="syncMove"

@@ -9,14 +9,15 @@ export class Player implements IEmittable {
     private static readonly MAX_TILES = 6;
 
     private _user: User;
-    private _tiles: Tile[] = [];
-    private _ready: boolean = false;
-    private _score: Score = new Score();
-    private _moveCount: number = 0;
-    private _thinkTimeInMS: number = 0;
+    private _tiles: Tile[];
+    private _ready: boolean;
+    private _score: Score;
+    private _moveCount: number;
+    private _thinkTimeInMS: number;
 
     constructor(user: User) {
         this._user = user;
+        this.prepare();
     }
 
     get user(): User {
@@ -45,6 +46,14 @@ export class Player implements IEmittable {
 
     get thinkTime(): number {
         return this._thinkTimeInMS;
+    }
+
+    prepare(): void {
+        this._tiles = [];
+        this._score = new Score();
+        this._ready = false;
+        this._thinkTimeInMS = 0;
+        this._moveCount = 0;
     }
 
     getEmittableState(): Object {

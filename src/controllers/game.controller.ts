@@ -1,6 +1,5 @@
 import { TileType } from "src/constants/tiletype";
 import { Board } from "src/entities/board";
-import { Hex } from "src/entities/hex";
 import { User } from "src/entities/user";
 import { Pouch } from "src/entities/pouch";
 import { IEmittable } from "src/interface/emittable.interface";
@@ -17,13 +16,12 @@ export class GameController implements IEmittable {
     private _starttime: Date;
     private _admin: User;
     private _players: Player[] = [];
-    private _rankedPlayers: Player[] = [];
+    private _rankedPlayers: Player[];
     private _board: Board;
-    private _pouch: Pouch = new Pouch();
+    private _pouch: Pouch;
     private _currentPlayer: Player;
-    private _winner: Player;
-    private _moves: Move[] = [];
-    private _log: Log = new Log();
+    private _moves: Move[];
+    private _log: Log;
     private _state: GameState = GameState.LOBBY;
 
     constructor(admin: User) {
@@ -44,13 +42,12 @@ export class GameController implements IEmittable {
             id: this._id,
             admin: this._admin,
             players: this._players.map((player: Player) => player.getEmittableState()),
-            rankedPlayers: this._rankedPlayers.map((player: Player) => player.getEmittableState()),
+            rankedPlayers: this._rankedPlayers?.map((player: Player) => player.getEmittableState()),
             currentPlayer: this._currentPlayer?.getEmittableState(),
             board: this._board?.getEmittableState(),
             state: this._state,
-            winner: this._winner,
-            log: this._log.getEmittableState(),
-            moves: this._moves.map((move: Move) => move.getEmittableState()),
+            log: this._log?.getEmittableState(),
+            moves: this._moves?.map((move: Move) => move.getEmittableState()),
         };
     }
 
@@ -102,7 +99,7 @@ export class GameController implements IEmittable {
         this.updateGameStartable();
     }
 
-    startGame(user: User) {
+    startGame(user: User): void {
         if (this._admin !== user) {
             throw new Error('unauthorized');
         }
@@ -111,11 +108,23 @@ export class GameController implements IEmittable {
             throw new Error('unauthorized');
         }
 
-        this._starttime = new Date();
+        this.prepareGame();
+
         this._state = GameState.AWAITING_MOVE;
-        this._board = new Board(this._players.length);
-        this.drawPlayerTiles();
-        this.determineCurrentPlayer();
+    }
+
+    startRematch(user: User): void {
+        if (this._admin !== user) {
+            throw new Error('unauthorized');
+        }
+
+        if (this._state !== GameState.OVER) {
+            throw new Error('unauthorized');
+        }
+
+        this.prepareGame();
+
+        this._state = GameState.LOBBY;
     }
 
     makeMove(user: User, params: Object) {
@@ -189,7 +198,7 @@ export class GameController implements IEmittable {
     }
 
 
-    swapTiles(user: User, shouldSwap: boolean) {
+    swapTiles(user: User, shouldSwap: boolean): void {
         if (this._currentPlayer.user.id !== user.id) {
             throw new Error('unauthorized');
         }
@@ -250,7 +259,7 @@ export class GameController implements IEmittable {
         return canSwap;
     }
 
-    private drawPlayerTiles() {
+    private drawPlayerTiles(): void {
         this._players.forEach((player: Player) => {
             while (player.canDrawTile()) {
                 const tile = this._pouch.drawTile();
@@ -259,13 +268,13 @@ export class GameController implements IEmittable {
         })
     }
 
-    private isGameOver() {
+    private isGameOver(): boolean {
         let winner = this._players.find((p: Player) => p.score.isMaxed());
 
-        return winner || this._board.isFull();
+        return !!winner || this._board.isFull();
     }
 
-    private rankPlayers() {
+    private rankPlayers(): void {
         this.calcMoveCountForPlayers();
         this.calcThinkTimeForPlayers();
 
@@ -292,14 +301,14 @@ export class GameController implements IEmittable {
         });
     }
 
-    private calcMoveCountForPlayers() {
+    private calcMoveCountForPlayers(): void {
         this._players.forEach((player: Player) => {
             const playerMoves = this._moves.filter((move: Move) => move.player.equals(player));
             player.moveCount = playerMoves.length;
         });
     }
 
-    private calcThinkTimeForPlayers() {
+    private calcThinkTimeForPlayers(): void {
         this._players.forEach((player: Player) => {
             player.resetThinkTime()
         });
@@ -312,6 +321,22 @@ export class GameController implements IEmittable {
 
             move.player.increaseThinkTime(diff);
         })
+    }
+
+    private prepareGame() {
+        this._starttime = new Date();
+        this._board = new Board(this._players.length);
+        this._log = new Log();
+        this._moves = [];
+        this._rankedPlayers = [];
+
+        this._players.forEach((player: Player) => {
+            player.prepare();
+        });
+        this._pouch = new Pouch();
+        this.drawPlayerTiles();
+
+        this.determineCurrentPlayer();
     }
 
     private generateId(length: number): string {

@@ -24,17 +24,17 @@
               <i class="fas fa-award" :class="calcRankColor(idx + 2)"></i>
             </td>
             <td style="text-align: right">{{ idx + 2 }}</td>
-            <td>{{ player.user.name }}</td>
+            <td style="overflow-wrap: anywhere;">{{ player.user.name }}</td>
             <td style="text-align: right">{{ player.moveCount }}</td>
             <td style="text-align: right">{{ formatMilliseconds(player.thinkTimeInMS) }}</td>
           </tr>
         </table>
       </div>
     </div>
-    <div class="hc-footer">
+    <div v-if="showRematch" class="hc-footer">
       <button
         class="hc-btn hc-btn-outline hc-nova dark"
-        @click="submitSwapDecision(true)"
+        @click="startRematch"
       >
         Rematch
       </button>
@@ -52,6 +52,11 @@ export default {
       type: Array,
       required: true,
       default: () => [],
+    },
+    showRematch: {
+      type: Boolean,
+      required: true,
+      default: false,
     },
   },
   mounted() {
@@ -93,6 +98,9 @@ export default {
     isWinner() {
       return this.socketId === this.winner.user.id;
     },
+    gameId() {
+      return this.$route.params.gameid;
+    },
     socketId() {
       return this.$store.state.socketId;
     },
@@ -109,12 +117,17 @@ export default {
         1: 'gold',
         2: 'silver',
         3: 'bronze',
+        4: 'copper',
       };
-
-      return mapping[rank] ?? 'white';
+      return mapping[rank];
     },
     formatMilliseconds(ms) {
       return new Date(ms).toISOString().substr(11, 8);
+    },
+    startRematch() {
+      this.$socket.client.emit('rematch', {
+        gameId: this.gameId,
+      });
     }
   },
 };
@@ -126,6 +139,7 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow: auto;
   background-color: $red;
 
   &.winner {
@@ -179,8 +193,8 @@ export default {
     color: $bronze;
   }
 
-  & .white {
-    color: $foreground;
+  & .copper {
+    color: $copper;
   }
 }
 
@@ -196,6 +210,7 @@ export default {
   & .hc-name {
     font-size: 1.5rem;
     margin-bottom: 0.5rem;
+    overflow-wrap: anywhere;
   }
 
   & .hc-info {

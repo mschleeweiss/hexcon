@@ -148,7 +148,7 @@ export default {
     saveUsername() {
       this.editUsername = false;
       this.$store.commit('updateName', this.username);
-        this.$socket.client.emit('changeName', { name: this.username });
+      this.$socket.client.emit('changeName', { name: this.username });
     },
     startGame() {
       this.$socket.client.emit('startGame', {
@@ -169,12 +169,14 @@ export default {
   width: 30%;
   padding: 1rem;
   box-sizing: border-box;
+  overflow: auto;
 }
 
 .hc-lobby-info {
   background-color: $current-line;
   width: 70%;
   padding: 1rem 2rem;
+  overflow: auto;
 }
 
 .hc-player-card {
@@ -224,6 +226,10 @@ export default {
 .hc-player-name {
   display: flex;
   align-items: center;
+
+  & > span {
+    overflow-wrap: anywhere;
+  }
 
   & > .hc-btn {
     border: 0;
