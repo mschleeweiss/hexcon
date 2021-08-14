@@ -1,6 +1,6 @@
 <template>
   <div class="hc-about">
-    <h1 class="hc-nova">About</h1>
+    <h1 class="hc-nova">About hex:con</h1>
     <h4 class="hc-nova">Legal notice</h4>
     <p>Information according to § 5 TMG</p>
     <ul>
@@ -40,6 +40,7 @@
 .hc-about {
   padding: 2rem 4rem;
   height: 100%;
+  overflow: auto;
 
   & h4 {
     margin-top: 2rem;

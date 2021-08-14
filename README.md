@@ -20,6 +20,7 @@ Todos:
 * [x] visu disconnected players
 * [x] visu game over (ladder + timings?)
 * [x] instant restart after game over
+* [ ] only show extra turn if state = awaiting move
 * [ ] write short rule page
 * [ ] error after swap (double click?)
 * [ ] about page

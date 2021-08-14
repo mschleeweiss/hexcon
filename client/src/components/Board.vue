@@ -241,7 +241,7 @@ export default {
     moves() {
       const latestMove = this.moves[this.moves.length - 1];
 
-      if (!latestMove) {
+      if (!latestMove || this.state !== 'awaitingMove') {
         return;
       }
 
