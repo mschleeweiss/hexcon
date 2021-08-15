@@ -16,22 +16,26 @@
       have a neighboring field which is not empty.
     </p>
     <p>
-      <strong>Exception:</strong> During the first round every player has to
-      place its tiles in one of the corners. Every player has to chose their own
-      corner.
+      <span class="hc-tag error">Exception</span> During the first round every
+      player has to place its tiles in one of the corners. Every player has to
+      chose their own corner.
     </p>
     <p>
-      <strong>Good to know:</strong> It is also possible to place your tiles in
-      such a way that individual fields remain free on the game board.
+      <span class="hc-tag success">Nice to know</span> It is also possible to
+      place your tiles in such a way that individual fields remain free on the
+      game board.
     </p>
 
     <h4 class="hc-nova">How can I place a tile?</h4>
     <p>
       As soon as it is your turn you can select one of your 6 playable tiles on
       the right side of the board. You can rotate the tile using the small
-      rotate button on the selected tile. You can also rotate the tile by
-      right-clicking while hovering the board. To place the tile on the board
-      simply left-click on the position on the board.
+      rotate button on the selected tile. To place the tile on the board simply
+      left-click on the position on the board.
+    </p>
+    <p>
+      <span class="hc-tag success">Nice to know</span> You can also rotate the
+      tile by right-clicking while hovering the board.
     </p>
 
     <h4 class="hc-nova">How is the score calculated?</h4>
@@ -45,12 +49,6 @@
       Adjacent means that they are connected in a straight line to your placed
       tile. No gaps and no other symbols can be between that adjacent field and
       your newly placed tile.
-    </p>
-    <p>
-      Check the following samples. In-game there are also hints on the fields so
-      <strong
-        >you will see how many points you can gain before placing a tile</strong
-      >.
     </p>
     <p class="hc-lightbox-container">
       <Lightbox
@@ -66,12 +64,24 @@
         description="Placing the double-blue tile yields 0 points for blue. Only existing fields are taken into consideration."
       />
     </p>
+        <p>
+      <span class="hc-tag success">Nice to know</span> In-game there are also hints on the fields so
+      <strong
+        >you will see how many points you can gain before placing a tile</strong
+      >.
+    </p>
     <p>
-      <strong>Important:</strong>The max score for each color is 18. Once you
-      reach the max score for a color
-      <strong class="green">you gain an extra turn!</strong>. After reaching the
+      <span class="hc-tag warning">Important</span> The max score for each color
+      is 18. Once you reach the max score for a color
+      <strong class="green">you gain an extra turn!</strong> After reaching the
       max score you will not gain any more points for that color. Therefore you
       can also only gain one extra turn per color.
+    </p>
+    <p>
+      <span class="hc-tag error">Exception</span> If you max out two colors in
+      the same move you will still only get one extra turn. But you can get a
+      second (or third etc.) extra turn if you max out another color in your
+      first extra turn.
     </p>
 
     <h4 class="hc-nova">How do I get new tiles?</h4>
@@ -81,9 +91,9 @@
       final extra turn.
     </p>
     <p>
-      <strong>Exception:</strong> If you have no tiles with the color of your
-      lowest scoring color you have the possibility to return all of your
-      current tiles and draw six new ones.
+      <span class="hc-tag error">Exception</span> If you have no tiles with the
+      color of your lowest scoring color you have the possibility to return all
+      of your current tiles and draw six new ones.
     </p>
     <Lightbox
       imagePath="swap.jpg"
@@ -93,7 +103,10 @@
       draw one tile (as usual)."
     />
     <h4 class="hc-nova">How do I win?</h4>
-    <p>The game ends when no new tiles can be placed on the board or when a player has reached the max score for all of their colors.</p>
+    <p>
+      The game ends when no new tiles can be placed on the board or when a
+      player has reached the max score for all of their colors.
+    </p>
     <p>The highest lowest score wins. But what does that mean?</p>
     <p>
       It doesn't matter how many times you maxed out a color. If your lowest
@@ -148,6 +161,11 @@ img {
 .hc-lightbox-container {
   display: flex;
   width: 100%;
+}
+
+.hc-tag {
+  position: relative;
+  top: -2px;
 }
 
 .green {
