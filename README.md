@@ -21,9 +21,9 @@ Todos:
 * [x] visu game over (ladder + timings?)
 * [x] instant restart after game over
 * [x] only show extra turn if state = awaiting move
-* [ ] write short rule page (<figure>)
-* [ ] error after swap (double click?)
+* [x] write short rule page (<figure>)
 * [x] about page
+* [ ] error after swap (double click?)
 * [ ] check session handling
 * [ ] split playername and username?
 * [ ] minimize score
