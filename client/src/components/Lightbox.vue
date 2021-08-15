@@ -1,13 +1,21 @@
 <template>
   <div class="hc-wrapper">
-    <img
+    <!-- <img
       class="hc-preview"
       :src="image"
       @click="showLightbox = true"
-    />
+    /> -->
+    <figure role="group">
+      <img class="hc-preview" :src="image" @click="showLightbox = true" />
+      <figcaption v-html="description" />
+    </figure>
 
     <!-- lightbox container hidden with CSS -->
-    <div class="hc-lightbox" @click="showLightbox = false" :class="{ show: showLightbox }">
+    <div
+      class="hc-lightbox"
+      @click="showLightbox = false"
+      :class="{ show: showLightbox }"
+    >
       <div
         class="hc-image"
         :style="{
@@ -34,31 +42,55 @@ export default {
       default: '',
     },
     description: {
-        type: String,
-        required: false,
-        default: '',
-    }
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   computed: {
-      image() {
-          return require(`@/assets/${this.imagePath}`);
-      }
-  }
+    image() {
+      return require(`@/assets/${this.imagePath}`);
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
 .hc-wrapper {
-    display: inline-block;
-    margin-right: 1rem;
+  display: inline-block;
+  margin-right: 1rem;
+  max-width: 20rem;
 }
 
 .hc-preview {
-  max-height: 25vh;
+  max-height: 10rem;
+  max-width: 20rem;
   cursor: pointer;
 
   &:hover {
     box-shadow: 0 5px 10px 0 rgb(0 0 0 / 25%);
+  }
+}
+
+figure {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  font-style: italic;
+  font-size: smaller;
+  margin: 0.5em;
+  padding: 0.5em;
+
+  & figcaption {
+    max-width: 100%;
+    margin-top:0.5rem;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
 
@@ -78,7 +110,7 @@ export default {
   background-color: rgba(0, 0, 0, 0.95);
 
   &.show {
-      display: flex;
+    display: flex;
   }
 }
 
@@ -91,6 +123,6 @@ export default {
 }
 
 .hc-description {
-    padding: 2rem;
+  padding: 2rem;
 }
 </style>
