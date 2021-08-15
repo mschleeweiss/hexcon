@@ -1,12 +1,7 @@
 <template>
   <div class="hc-wrapper">
-    <!-- <img
-      class="hc-preview"
-      :src="image"
-      @click="showLightbox = true"
-    /> -->
-    <figure role="group">
-      <img class="hc-preview" :src="image" @click="showLightbox = true" />
+    <figure role="group" @click="showLightbox = true">
+      <img class="hc-preview" :src="image" />
       <figcaption v-html="description" />
     </figure>
 
@@ -63,13 +58,8 @@ export default {
 }
 
 .hc-preview {
-  max-height: 10rem;
-  max-width: 20rem;
-  cursor: pointer;
-
-  &:hover {
-    box-shadow: 0 5px 10px 0 rgb(0 0 0 / 25%);
-  }
+  max-height: 9rem;
+  max-width: 18rem;
 }
 
 figure {
@@ -80,12 +70,18 @@ figure {
   align-items: center;
   font-style: italic;
   font-size: smaller;
-  margin: 0.5em;
-  padding: 0.5em;
+  margin: 0.5rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 5px 10px 0 rgb(0 0 0 / 25%);
+  }
 
   & figcaption {
     max-width: 100%;
-    margin-top:0.5rem;
+    margin-top: 0.5rem;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
