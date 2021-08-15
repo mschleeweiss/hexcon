@@ -103,7 +103,7 @@ figure {
   width: 100%;
   height: 100%;
   cursor: pointer;
-  background-color: rgba(0, 0, 0, 0.95);
+  background-color: rgba(0, 0, 0, 0.9);
 
   &.show {
     display: flex;
