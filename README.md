@@ -23,7 +23,10 @@ Todos:
 * [x] only show extra turn if state = awaiting move
 * [x] write short rule page (<figure>)
 * [x] about page
-* [ ] error after swap (double click?)
-* [ ] check session handling
-* [ ] split playername and username?
+* [x] check session handling
+* [x] error after swap (double click?)
 * [ ] minimize score
+* [ ] make games pub/private
+* [ ] list of public games
+* [ ] kickban players
+* [ ] split playername and username?

@@ -24,27 +24,33 @@
               >Disconnected</span
             >
           </div>
-          <div
-            v-for="score in player.score.values"
-            :key="score.type"
-            class="hc-scorebar"
-          >
+          <div class="hc-maxi-score">
             <div
-              class="hc-score-id hc-scorepoint"
-              :class="calcColor(score.type)"
-              style="--point: 18"
-            />
-            <div
-              v-for="point in scorePoints"
-              :key="point"
-              class="hc-scorepoint"
-              :class="[calcColor(score.type), { active: point <= score.value }]"
-              :style="`--point:${point}`"
-            />
-            <span>
-              {{ score.value }}
-            </span>
+              v-for="score in player.score.values"
+              :key="score.type"
+              class="hc-scorebar"
+            >
+              <div
+                class="hc-score-id hc-scorepoint"
+                :class="calcColor(score.type)"
+                style="--point: 18"
+              />
+              <div
+                v-for="point in scorePoints"
+                :key="point"
+                class="hc-scorepoint"
+                :class="[
+                  calcColor(score.type),
+                  { active: point <= score.value },
+                ]"
+                :style="`--point:${point}`"
+              />
+              <span>
+                {{ score.value }}
+              </span>
+            </div>
           </div>
+          <div class="hc-mini-score"></div>
         </div>
       </div>
       <div class="hc-gamelog-container">
@@ -435,6 +441,9 @@ export default {
       this.selectedTileDirection = 0;
     },
     submitSwapDecision(swap) {
+      if (this.state !== 'awaitingSwap') {
+        return;
+      }
       this.$emit('swap', swap);
     },
   },
